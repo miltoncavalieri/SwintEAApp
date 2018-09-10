@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+  <persistence-unit name="SwintService" transaction-type="JTA">
+    <shared-cache-mode>NONE</shared-cache-mode>
+    <validation-mode>NONE</validation-mode>
+    <properties>
+      <!--      <property name="hibernate.hbm2ddl.auto" value="validate" /> -->
+      <property name="hibernate.show_sql" value="false"/>
+      <property name="hibernate.format_sql" value="true"/>
+      <property name="hibernate.generate_statistics" value="false"/>
+      <property name="hibernate.use_sql_comments" value="false"/>
+      <property name="hibernate.bytecode.use_reflection_optimizer" value="false"/>
+    </properties>
+    <provider>org.hibernate.ejb.HibernatePersistence</provider>
+    <jta-data-source>java:/jboss/datasources/SwintDS</jta-data-source>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Agente</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Agentesit</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Analise</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Analisedoc</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Analisesit</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Banco</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Checkpoint</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Ckpleitura</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Ckptipo</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Cliente</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Clientefilial</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Comissao</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Condutor</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Contagente</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Cor</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Dbparam</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Estado</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Evento</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Fabricante</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Fonte</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Locaendereco</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Locatario</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Locatelefone</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Modelo</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Obstipo</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Operacao</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Pagamento</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Pedbus</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Pedbusit</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Pedbusobs</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Permissao</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Regiao</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Sla</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Syslog</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Sysver</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Tipodoc</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Tipopag</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Tipopes</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Usuario</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Usuperm</class>
+    <class>br.com.zaiac.swintwebapp.jpa.entities.Veiculo</class>
+    <class>br.com.zaiac.swintwebapp.jpa.views.VwAnalise</class>
+    <class>br.com.zaiac.swintwebapp.jpa.views.VwOperacaoMobile</class>
+    <class>br.com.zaiac.swintwebapp.jpa.views.VwPagagente</class>
+    <class>br.com.zaiac.swintwebapp.jpa.views.VwPbMobile</class>
+    <class>br.com.zaiac.swintwebapp.jpa.views.VwPedbus</class>
+    <class>br.com.zaiac.swintwebapp.jpa.views.custom.VwOperacaoMobileCount</class>
+    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+  </persistence-unit>
+</persistence>

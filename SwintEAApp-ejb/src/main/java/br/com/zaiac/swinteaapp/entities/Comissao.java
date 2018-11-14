@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.zaiac.swinteaapp.entities;
 
 import java.io.Serializable;
@@ -23,15 +18,14 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-/**
- *
- * @author root
- */
 @Entity
 @Table(name = "comissao")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Comissao.findAll", query = "SELECT c FROM Comissao c")})
+    @NamedQuery(name = "Comissao.findAll", query = "SELECT c FROM Comissao c ORDER BY c.comDescricao"),
+    @NamedQuery(name = "Comissao.findByComId", query = "SELECT c FROM Comissao c WHERE c.comId = :comId")
+})
+
 public class Comissao implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -134,7 +128,6 @@ public class Comissao implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Comissao)) {
             return false;
         }

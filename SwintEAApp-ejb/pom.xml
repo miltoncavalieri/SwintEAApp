@@ -4,12 +4,12 @@
     <parent>
     <artifactId>SwintEAApp</artifactId>
     <groupId>br.com.zaiac</groupId>
-    <version>1.7-SNAPSHOT</version>
+    <version>1.7</version>
   </parent>
 
     <groupId>br.com.zaiac</groupId>
     <artifactId>SwintEAApp-ejb</artifactId>
-    <version>1.7-SNAPSHOT</version>
+    <version>1.7</version>
     <packaging>ejb</packaging>
 
     <name>SwintEAApp-ejb</name>
@@ -33,10 +33,21 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>br.com.zaiac</groupId>
+            <artifactId>EJBRemoteInterface</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.5</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <version>7.0</version>
-            <scope>provided</scope>
+            <type>jar</type>
         </dependency>
 <!--
         Entries for iReport

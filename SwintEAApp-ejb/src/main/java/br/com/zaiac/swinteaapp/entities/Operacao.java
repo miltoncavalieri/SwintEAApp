@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.zaiac.swinteaapp.entities;
 
 import java.io.Serializable;
@@ -23,16 +18,18 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-/**
- *
- * @author root
- */
 @Entity
 @Table(name = "operacao")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Operacao.findAll", query = "SELECT o FROM Operacao o")})
 public class Operacao implements Serializable {
+
+    @Lob
+    @Column(name = "ope_imagem")
+    private byte[] opeImagem;
+    @OneToMany(mappedBy = "opeId")
+    private List<Checkpoint> checkpointList;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -45,9 +42,6 @@ public class Operacao implements Serializable {
     @Size(min = 1, max = 30)
     @Column(name = "ope_nome")
     private String opeNome;
-    @Lob
-    @Column(name = "ope_imagem")
-    private byte[] opeImagem;
     @OneToMany(mappedBy = "opeId")
     private List<Pedbus> pedbusList;
 
@@ -105,7 +99,6 @@ public class Operacao implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Operacao)) {
             return false;
         }
@@ -120,5 +113,13 @@ public class Operacao implements Serializable {
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.Operacao[ opeId=" + opeId + " ]";
     }
-    
+
+    @XmlTransient
+    public List<Checkpoint> getCheckpointList() {
+        return checkpointList;
+    }
+
+    public void setCheckpointList(List<Checkpoint> checkpointList) {
+        this.checkpointList = checkpointList;
+    }
 }

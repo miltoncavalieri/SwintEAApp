@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.zaiac.swinteaapp.entities;
 
 import java.io.Serializable;
@@ -22,16 +17,17 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-/**
- *
- * @author root
- */
 @Entity
 @Table(name = "cep_localidade")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "CepLocalidade.findAll", query = "SELECT c FROM CepLocalidade c")})
+    @NamedQuery(name = "CepLocalidade.findAll", query = "SELECT c FROM CepLocalidade c"),
+    @NamedQuery(name = "CepLocalidade.findByLocNu", query = "SELECT c FROM CepLocalidade c WHERE c.locNu = :locNu")
+})
 public class CepLocalidade implements Serializable {
+
+    @OneToMany(mappedBy = "locNuRecup")
+    private List<Checkpoint> checkpointList;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -60,8 +56,8 @@ public class CepLocalidade implements Serializable {
     @JoinColumn(name = "ufe_sg", referencedColumnName = "ufe_sg")
     @ManyToOne
     private CepFaixaUf ufeSg;
-    @OneToMany(mappedBy = "locNuRecup")
-    private List<Pedbus> pedbusList;
+//    @OneToMany(mappedBy = "locNuRecup")
+//    private List<Pedbus> pedbusList;
     @OneToMany(mappedBy = "locNuInvest")
     private List<Pedbus> pedbusList1;
     @OneToMany(mappedBy = "locNuDevolucao")
@@ -85,7 +81,7 @@ public class CepLocalidade implements Serializable {
     }
 
     public String getLocNo() {
-        return locNo;
+        return locNo.toUpperCase();
     }
 
     public void setLocNo(String locNo) {
@@ -125,7 +121,7 @@ public class CepLocalidade implements Serializable {
     }
 
     public String getLocNoAbrev() {
-        return locNoAbrev;
+        return locNoAbrev.toUpperCase();
     }
 
     public void setLocNoAbrev(String locNoAbrev) {
@@ -148,14 +144,14 @@ public class CepLocalidade implements Serializable {
         this.ufeSg = ufeSg;
     }
 
-    @XmlTransient
-    public List<Pedbus> getPedbusList() {
-        return pedbusList;
-    }
+//    @XmlTransient
+//    public List<Pedbus> getPedbusList() {
+//        return pedbusList;
+//    }
 
-    public void setPedbusList(List<Pedbus> pedbusList) {
-        this.pedbusList = pedbusList;
-    }
+//    public void setPedbusList(List<Pedbus> pedbusList) {
+//        this.pedbusList = pedbusList;
+//    }
 
     @XmlTransient
     public List<Pedbus> getPedbusList1() {
@@ -193,7 +189,6 @@ public class CepLocalidade implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof CepLocalidade)) {
             return false;
         }
@@ -207,6 +202,15 @@ public class CepLocalidade implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.CepLocalidade[ locNu=" + locNu + " ]";
+    }
+
+    @XmlTransient
+    public List<Checkpoint> getCheckpointList() {
+        return checkpointList;
+    }
+
+    public void setCheckpointList(List<Checkpoint> checkpointList) {
+        this.checkpointList = checkpointList;
     }
     
 }

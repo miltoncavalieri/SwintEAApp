@@ -33,6 +33,20 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Analise.findByPbuId", query = "SELECT a FROM Analise a WHERE a.pbuId = :pbuId")})
 public class Analise implements Serializable {
 
+    @OneToMany(mappedBy = "pbuId")
+    private List<Pagamento> pagamentoList;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "pbuId")
+    private List<Checkpoint> checkpointList;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "pbuId")
+    private List<Ckpleitura> ckpleituraList;
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "ana_ativo")
+    private short anaAtivo;
+
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
     @NotNull
@@ -431,7 +445,6 @@ public class Analise implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Analise)) {
             return false;
         }
@@ -445,6 +458,41 @@ public class Analise implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.Analise[ pbuId=" + pbuId + " ]";
+    }
+
+    public short getAnaAtivo() {
+        return anaAtivo;
+    }
+
+    public void setAnaAtivo(short anaAtivo) {
+        this.anaAtivo = anaAtivo;
+    }
+
+    @XmlTransient
+    public List<Ckpleitura> getCkpleituraList() {
+        return ckpleituraList;
+    }
+
+    public void setCkpleituraList(List<Ckpleitura> ckpleituraList) {
+        this.ckpleituraList = ckpleituraList;
+    }
+
+    @XmlTransient
+    public List<Checkpoint> getCheckpointList() {
+        return checkpointList;
+    }
+
+    public void setCheckpointList(List<Checkpoint> checkpointList) {
+        this.checkpointList = checkpointList;
+    }
+
+    @XmlTransient
+    public List<Pagamento> getPagamentoList() {
+        return pagamentoList;
+    }
+
+    public void setPagamentoList(List<Pagamento> pagamentoList) {
+        this.pagamentoList = pagamentoList;
     }
     
 }

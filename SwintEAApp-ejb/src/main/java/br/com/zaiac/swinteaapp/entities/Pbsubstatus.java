@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.zaiac.swinteaapp.entities;
 
 import java.io.Serializable;
@@ -20,15 +15,13 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-/**
- *
- * @author root
- */
 @Entity
 @Table(name = "pbsubstatus")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Pbsubstatus.findAll", query = "SELECT p FROM Pbsubstatus p")})
+    @NamedQuery(name = "Pbsubstatus.findAll", query = "SELECT p FROM Pbsubstatus p"),
+    @NamedQuery(name = "Pbsubstatus.findPusId", query = "SELECT p FROM Pbsubstatus p WHERE p.pusId = :pusId")
+})
 public class Pbsubstatus implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -91,7 +84,6 @@ public class Pbsubstatus implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Pbsubstatus)) {
             return false;
         }

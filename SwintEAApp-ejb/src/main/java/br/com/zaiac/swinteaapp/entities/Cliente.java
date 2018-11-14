@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.zaiac.swinteaapp.entities;
 
 import java.io.Serializable;
@@ -28,16 +23,20 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-/**
- *
- * @author root
- */
 @Entity
 @Table(name = "cliente")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Cliente.findAll", query = "SELECT c FROM Cliente c")})
+    @NamedQuery(name = "Cliente.findAll", query = "SELECT c FROM Cliente c"),
+    @NamedQuery(name = "Cliente.findByCliId", query = "SELECT c FROM Cliente c WHERE c.cliId = :cliId")
+})
 public class Cliente implements Serializable {
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "cliente")
+    private List<Clientecobranca> clientecobrancaList;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "cliId")
+    private List<Lotercbo> lotercboList;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -204,7 +203,6 @@ public class Cliente implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Cliente)) {
             return false;
         }
@@ -218,6 +216,24 @@ public class Cliente implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.Cliente[ cliId=" + cliId + " ]";
+    }
+
+    @XmlTransient
+    public List<Lotercbo> getLotercboList() {
+        return lotercboList;
+    }
+
+    public void setLotercboList(List<Lotercbo> lotercboList) {
+        this.lotercboList = lotercboList;
+    }
+
+    @XmlTransient
+    public List<Clientecobranca> getClientecobrancaList() {
+        return clientecobrancaList;
+    }
+
+    public void setClientecobrancaList(List<Clientecobranca> clientecobrancaList) {
+        this.clientecobrancaList = clientecobrancaList;
     }
     
 }

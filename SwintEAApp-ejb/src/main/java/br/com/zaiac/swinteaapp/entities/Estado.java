@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.zaiac.swinteaapp.entities;
 
 import java.io.Serializable;
@@ -23,16 +18,17 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-/**
- *
- * @author root
- */
 @Entity
 @Table(name = "estado")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Estado.findAll", query = "SELECT e FROM Estado e")})
+    @NamedQuery(name = "Estado.findAll", query = "SELECT e FROM Estado e"),
+    @NamedQuery(name = "Estado.findByEstId", query = "SELECT e FROM Estado e WHERE e.estId = :estId")
+})
 public class Estado implements Serializable {
+
+    @OneToMany(mappedBy = "estIdRecup")
+    private List<Checkpoint> checkpointList;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -51,8 +47,8 @@ public class Estado implements Serializable {
     private Regiao regId;
     @OneToMany(mappedBy = "estIdInvest")
     private List<Pedbus> pedbusList;
-    @OneToMany(mappedBy = "estIdRecup")
-    private List<Pedbus> pedbusList1;
+//    @OneToMany(mappedBy = "estIdRecup")
+//    private List<Pedbus> pedbusList1;
     @OneToMany(mappedBy = "estIdLocacao")
     private List<Analise> analiseList;
     @OneToMany(mappedBy = "estIdDevolucao")
@@ -106,14 +102,14 @@ public class Estado implements Serializable {
         this.pedbusList = pedbusList;
     }
 
-    @XmlTransient
-    public List<Pedbus> getPedbusList1() {
-        return pedbusList1;
-    }
+//    @XmlTransient
+//    public List<Pedbus> getPedbusList1() {
+//        return pedbusList1;
+//    }
 
-    public void setPedbusList1(List<Pedbus> pedbusList1) {
-        this.pedbusList1 = pedbusList1;
-    }
+//    public void setPedbusList1(List<Pedbus> pedbusList1) {
+//        this.pedbusList1 = pedbusList1;
+//    }
 
     @XmlTransient
     public List<Analise> getAnaliseList() {
@@ -142,7 +138,6 @@ public class Estado implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Estado)) {
             return false;
         }
@@ -156,6 +151,15 @@ public class Estado implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.Estado[ estId=" + estId + " ]";
+    }
+
+    @XmlTransient
+    public List<Checkpoint> getCheckpointList() {
+        return checkpointList;
+    }
+
+    public void setCheckpointList(List<Checkpoint> checkpointList) {
+        this.checkpointList = checkpointList;
     }
     
 }

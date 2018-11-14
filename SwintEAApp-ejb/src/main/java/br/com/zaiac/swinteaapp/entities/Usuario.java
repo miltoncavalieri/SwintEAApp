@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.zaiac.swinteaapp.entities;
 
 import java.io.Serializable;
@@ -28,16 +23,43 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-/**
- *
- * @author root
- */
 @Entity
 @Table(name = "usuario")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Usuario.findAll", query = "SELECT u FROM Usuario u")})
+    @NamedQuery(name = "Usuario.findAll", query = "SELECT u FROM Usuario u"),
+    @NamedQuery(name = "Usuario.findByUsuId", query = "SELECT u FROM Usuario u WHERE u.usuId = :usuId")
+})
 public class Usuario implements Serializable {
+
+    @OneToMany(mappedBy = "usuIdAprovador")
+    private List<Recibo> reciboList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "usuIdSolicitante")
+    private List<Recibo> reciboList1;
+
+//    @OneToMany(mappedBy = "usuIdAgenteNovo")
+//    private List<Checkpoint> checkpointList;
+//    @OneToMany(mappedBy = "usuIdAgente")
+//    private List<Checkpoint> checkpointList1;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "usuIdCkp")
+    private List<Checkpoint> checkpointList2;
+    @OneToMany(mappedBy = "usuIdOrigem")
+    private List<Checkpoint> checkpointList3;
+    @OneToMany(mappedBy = "usuIdDestino")
+    private List<Checkpoint> checkpointList4;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "usuId")
+    private List<Agente> agenteList;
+    @OneToMany(mappedBy = "usuIdAprovador")
+    private List<Lotepgto> lotepgtoList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "usuIdAgente")
+    private List<Lotepgto> lotepgtoList1;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "usuId")
+    private List<Contagente> contagenteList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "usuId")
+    private List<Lotercbo> lotercboList;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "usuId")
+    private List<Ckpleitura> ckpleituraList;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -349,7 +371,6 @@ public class Usuario implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Usuario)) {
             return false;
         }
@@ -363,6 +384,123 @@ public class Usuario implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.Usuario[ usuId=" + usuId + " ]";
+    }
+
+    @XmlTransient
+    public List<Ckpleitura> getCkpleituraList() {
+        return ckpleituraList;
+    }
+
+    public void setCkpleituraList(List<Ckpleitura> ckpleituraList) {
+        this.ckpleituraList = ckpleituraList;
+    }
+
+//    @XmlTransient
+//    public List<Checkpoint> getCheckpointList() {
+//        return checkpointList;
+//    }
+
+//    public void setCheckpointList(List<Checkpoint> checkpointList) {
+//        this.checkpointList = checkpointList;
+//    }
+
+//    @XmlTransient
+//    public List<Checkpoint> getCheckpointList1() {
+//        return checkpointList1;
+//    }
+
+//    public void setCheckpointList1(List<Checkpoint> checkpointList1) {
+//        this.checkpointList1 = checkpointList1;
+//    }
+
+    @XmlTransient
+    public List<Checkpoint> getCheckpointList2() {
+        return checkpointList2;
+    }
+
+    public void setCheckpointList2(List<Checkpoint> checkpointList2) {
+        this.checkpointList2 = checkpointList2;
+    }
+
+    @XmlTransient
+    public List<Checkpoint> getCheckpointList3() {
+        return checkpointList3;
+    }
+
+    public void setCheckpointList3(List<Checkpoint> checkpointList3) {
+        this.checkpointList3 = checkpointList3;
+    }
+
+    @XmlTransient
+    public List<Checkpoint> getCheckpointList4() {
+        return checkpointList4;
+    }
+
+    public void setCheckpointList4(List<Checkpoint> checkpointList4) {
+        this.checkpointList4 = checkpointList4;
+    }
+
+    @XmlTransient
+    public List<Agente> getAgenteList() {
+        return agenteList;
+    }
+
+    public void setAgenteList(List<Agente> agenteList) {
+        this.agenteList = agenteList;
+    }
+
+    @XmlTransient
+    public List<Lotepgto> getLotepgtoList() {
+        return lotepgtoList;
+    }
+
+    public void setLotepgtoList(List<Lotepgto> lotepgtoList) {
+        this.lotepgtoList = lotepgtoList;
+    }
+
+    @XmlTransient
+    public List<Lotepgto> getLotepgtoList1() {
+        return lotepgtoList1;
+    }
+
+    public void setLotepgtoList1(List<Lotepgto> lotepgtoList1) {
+        this.lotepgtoList1 = lotepgtoList1;
+    }
+
+    @XmlTransient
+    public List<Contagente> getContagenteList() {
+        return contagenteList;
+    }
+
+    public void setContagenteList(List<Contagente> contagenteList) {
+        this.contagenteList = contagenteList;
+    }
+
+    @XmlTransient
+    public List<Lotercbo> getLotercboList() {
+        return lotercboList;
+    }
+
+    public void setLotercboList(List<Lotercbo> lotercboList) {
+        this.lotercboList = lotercboList;
+    }
+
+    @XmlTransient
+    public List<Recibo> getReciboList() {
+        return reciboList;
+    }
+
+    public void setReciboList(List<Recibo> reciboList) {
+        this.reciboList = reciboList;
+    }
+
+    @XmlTransient
+    public List<Recibo> getReciboList1() {
+        return reciboList1;
+    }
+
+    public void setReciboList1(List<Recibo> reciboList1) {
+        this.reciboList1 = reciboList1;
     }
     
 }

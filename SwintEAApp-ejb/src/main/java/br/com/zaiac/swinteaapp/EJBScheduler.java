@@ -19,6 +19,7 @@ import br.com.zaiac.swinteaapp.views.VwPedbusEnvio;
 import javax.ejb.LocalBean;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -28,16 +29,20 @@ import java.util.logging.Logger;
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.annotation.Resource;
+//import static javax.ejb.ConcurrencyManagementType.BEAN;
 import javax.ejb.Schedule;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionManagement;
+import static javax.ejb.TransactionManagementType.BEAN;
 import javax.inject.Inject;
-import javax.mail.BodyPart;
+//import javax.inject.Inject;
+//import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
+//import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
+//import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -57,17 +62,33 @@ import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+//import javax.persistence.RollbackException;
+
+
+
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.SystemException;
+
+
+import javax.transaction.SystemException;
 import javax.transaction.Transactional;
+import javax.transaction.UserTransaction;
 
 
 @Stateless
 @LocalBean
 
-@Transactional
-public class CheckpointEmail {
-    private static final Logger logger = Logger.getLogger(CheckpointEmail.class.getName());
+@TransactionManagement(BEAN)
+
+public class EJBScheduler {
+    private static final Logger logger = Logger.getLogger(EJBScheduler.class.getName());
     @PersistenceContext(unitName = "SwintService", type=PersistenceContextType.TRANSACTION)
     private EntityManager em;
+    
+    @Inject UserTransaction tx;
     
     @Resource(name = "java:jboss/mail/Swint")
     private Session session;
@@ -75,7 +96,7 @@ public class CheckpointEmail {
     
     @Schedule(dayOfWeek = "*", hour = "*", minute = "*/5", year="*", persistent = false)
 //    @Schedule(dayOfWeek = "*", hour = "*", minute = "*/2", year="*", persistent = false)    
-    public void enviaEmailAgente() throws NamingException, NoClassDefFoundError {
+    public void enviaEmailAgente() throws Exception, NamingException, NoClassDefFoundError {
         logger.log(Level.INFO, "Checking for Send-Email to Agente Versão 1.7");
         
         PedbusFacade pedbusJpa = new PedbusFacade();
@@ -116,15 +137,23 @@ public class CheckpointEmail {
         int seqdoc = 0;
         
         Pedbusit pedbusit = pedbusitJpa.findByPbsId(Short.parseShort("1"));
+
+        Context initContext = new InitialContext();
+        Context envContext  = (Context)initContext.lookup("java:jboss");
+        DataSource ds = (DataSource)envContext.lookup("datasources/SwintDS");
+        Connection conn = ds.getConnection();
         
         try {
+            tx.begin();
+            
             MimeMessage msg = new MimeMessage(session);
             MimeMultipart multipart = new MimeMultipart();
             MimeBodyPart messageBodyPart;
             
             msg.setFrom(dbparam.getParEmailOrigem());
+
             
-//            Analise analise = null;
+            
             for (VwPedbusEnvio pb : vwPedbusEnvios) {
                 analise = analiseJpa.findByPbuId(pb.getPbuId());
                 pedbus = pedbusJpa.findByPbuId(pb.getPbuId());
@@ -136,13 +165,9 @@ public class CheckpointEmail {
                     continue;
                 }
                 
-//PB_NUMERO_LOCADORA_PLACA_CIDADE_UF                
-                
                 msg.setFrom("gerencia@zaiac.com.br");
-//                String subject = "PB_" + pb.getPbuId() + "_" + pb.getCliNome() + "_" + pb.getAnaVeiculoPlaca() + "_" + pb.getModNome() + "_" + pb.getPbuInvestCidade() + "_" + pb.getEstInvestUf();
                 String subject = pb.getReferencia();
-                System.out.println(subject);
-                
+
                 msg.setSubject(subject);
                 msg.setRecipients(Message.RecipientType.TO, vwPbemailtocc.getTo());
                 
@@ -168,13 +193,10 @@ public class CheckpointEmail {
                 multipart.addBodyPart(messageBodyPart);
 
                 mapa.clear();
-//                mapa.put("pbuId", Integer.parseUnsignedInt(pb.getPbuId().toString()));
                 mapa.put("pbuId", Integer.parseUnsignedInt(String.valueOf(pb.getPbuId())));
+                
+                
                 try {
-                    Context initContext = new InitialContext();
-                    Context envContext  = (Context)initContext.lookup("java:jboss");
-                    DataSource ds = (DataSource)envContext.lookup("datasources/SwintDS");
-                    Connection conn = ds.getConnection();
                     
                     JasperReport jasperReport = (JasperReport) JRLoader.loadObjectFromFile(caminhoOrigem + arquivoJasper);
                     JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, mapa, conn);
@@ -184,23 +206,17 @@ public class CheckpointEmail {
                     jrPdfExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(arquivoGerado));
                     jrPdfExporter.exportReport();
                     
-                    conn.close();
-                    
                     messageBodyPart = new MimeBodyPart();                    
                     javax.activation.DataSource source = new FileDataSource(caminhoRelatorio + pb.getPbuId() + ".pdf"); //É o nome do arquivo
                     messageBodyPart.setDataHandler(new DataHandler(source));
-                    messageBodyPart.setFileName("PB_" + pb.getPbuId() + "_" + pb.getCliNome() + "_" + pb.getAnaVeiculoPlaca() + "_"  + pb.getModNome() + "_" + pb.getPbuInvestCidade() + "_" + pb.getEstInvestUf() + ".pdf"); // É o nome que vai aparecer no Outlook
+//                    messageBodyPart.setFileName("PB_" + pb.getPbuId() + "_" + pb.getCliNome() + "_" + pb.getAnaVeiculoPlaca() + "_"  + pb.getModNome() + "_" + pb.getPbuInvestCidade() + "_" + pb.getEstInvestUf() + ".pdf"); // É o nome que vai aparecer no Outlook
+                    messageBodyPart.setFileName("PB_" + pb.getReferencia() + ".pdf"); // É o nome que vai aparecer no Outlook                    
                     multipart.addBodyPart(messageBodyPart);
                     
-                    pedbus.setPbsId(pedbusit);
-                    pedbusJpa.edit(pedbus);
-
                 } catch (JRException e) {
-                    System.out.println(e.toString());
-                } catch (SQLException e) {
-                    System.out.println(e.toString());
+                    logger.log(Level.SEVERE, e.toString());
                 } catch (Exception e) {
-                    System.out.println(e.toString());
+                    logger.log(Level.SEVERE, e.toString());
                 }
                 
                 List<Analisedoc> analisedocs = analisedocJpa.findByPbuId(analise);
@@ -217,21 +233,47 @@ public class CheckpointEmail {
                     }
 
                 }
-
-                msg.setContent(multipart);
-                Transport.send(msg);
-                multipart = null;
-                System.gc();
-                multipart = new MimeMultipart();
-                System.out.println("Sending e-mail to Pedbus ID: " + pb.getPbuId() + " EmailTO: " + vwPbemailtocc.getTo() + " EmailCc: " + vwPbemailtocc.getCc());                
-                                
-          }
+                try {
+                    msg.setContent(multipart);
+                    Transport.send(msg);
+                    multipart = null;
+                    System.gc();
+                    multipart = new MimeMultipart();
+                    pedbus.setPbsId(pedbusit);
+                    pedbus.setPbuErroEnvio(Boolean.FALSE);
+                    pedbusJpa.edit(pedbus);
+                    logger.log(Level.INFO, "Sending e-mail to Pedbus ID: {0} EmailTO: {1} EmailCc: {2}", 
+                            new Object[]{pb.getPbuId(), vwPbemailtocc.getTo(), vwPbemailtocc.getCc()});
+                    
+                } catch (MessagingException e) {
+                    pedbus.setPbuErroEnvio(Boolean.TRUE);
+                    pedbusJpa.edit(pedbus);
+                    logger.log(Level.WARNING,"Failed to send e-mail Pedbus: {0} Message: {1}", new Object[]{pb.getPbuId(), e.toString()});                    
+                }
+                
+            }
+            tx.commit();
+            conn.close();
         } catch (MessagingException e) {
-//            System.out.println("Sending e-mail to Pedbus ID: " + pb.getPbuId() + " EmailTO: " + vwPbemailtocc.getTo() + " EmailCc: " + vwPbemailtocc.getCc());                
-            System.out.println("Failed to send e-mail" + e.toString());
-        }
+            logger.log(Level.WARNING,"Failed to send e-mail" + e.toString());
+        } catch (Exception e) {
+                        if (
+                            (e instanceof NotSupportedException) ||
+                            (e instanceof SystemException) ||     
+                            (e instanceof RollbackException) ||     
+                            (e instanceof HeuristicMixedException) ||     
+                            (e instanceof HeuristicRollbackException)
+                            ) {  
+                            throw new Exception(e);
+                        } else {
+                            tx.rollback();
+                            throw new Exception (e);
+                        }
+                    }
+
+
         if (!enviado) {
-           System.out.println("There are not e-mail to be send"); 
+           logger.log(Level.INFO, "There are not e-mail to be send"); 
         }
         vwPedbusEnvios.clear();
         dbparams.clear();

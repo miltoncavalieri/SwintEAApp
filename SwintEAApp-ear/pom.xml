@@ -4,12 +4,12 @@
     <parent>
     <artifactId>SwintEAApp</artifactId>
     <groupId>br.com.zaiac</groupId>
-    <version>1.7-SNAPSHOT</version>
+    <version>1.7</version>
   </parent>
 
     <groupId>br.com.zaiac</groupId>
     <artifactId>SwintEAApp-ear</artifactId>
-    <version>1.7-SNAPSHOT</version>
+    <version>1.7</version>
     <packaging>ear</packaging>
 
     <name>SwintEAApp-ear</name>
@@ -44,7 +44,7 @@
         <dependency>
             <groupId>br.com.zaiac</groupId>
             <artifactId>SwintEAApp-ejb</artifactId>
-            <version>1.7-SNAPSHOT</version>
+            <version>1.7</version>
             <type>ejb</type>
         </dependency>
     </dependencies>

@@ -33,6 +33,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Tipopes.findAll", query = "SELECT t FROM Tipopes t")})
 public class Tipopes implements Serializable {
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "pesId")
+    private List<Contagente> contagenteList;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -97,7 +100,6 @@ public class Tipopes implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Tipopes)) {
             return false;
         }
@@ -111,6 +113,15 @@ public class Tipopes implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.Tipopes[ pesId=" + pesId + " ]";
+    }
+
+    @XmlTransient
+    public List<Contagente> getContagenteList() {
+        return contagenteList;
+    }
+
+    public void setContagenteList(List<Contagente> contagenteList) {
+        this.contagenteList = contagenteList;
     }
     
 }

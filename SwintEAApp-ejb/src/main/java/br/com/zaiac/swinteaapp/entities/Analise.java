@@ -30,8 +30,16 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Analise.findAll", query = "SELECT a FROM Analise a"),
-    @NamedQuery(name = "Analise.findByPbuId", query = "SELECT a FROM Analise a WHERE a.pbuId = :pbuId")})
+    @NamedQuery(name = "Analise.findByPbuId", query = "SELECT a FROM Analise a WHERE a.pbuId = :pbuId"),
+    @NamedQuery(name = "Analise.findPbEmCampoPorOperacao", query = "SELECT a FROM Analise a JOIN a.pedbus p WHERE a.anaAtivo = 1 and p.pbsId IN (1,4) and p.opeId = :opeId")
+})
 public class Analise implements Serializable {
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "ana_dt_receb")
+    @Temporal(TemporalType.DATE)
+    private Date anaDtReceb;
 
     @OneToMany(mappedBy = "pbuId")
     private List<Pagamento> pagamentoList;
@@ -493,6 +501,14 @@ public class Analise implements Serializable {
 
     public void setPagamentoList(List<Pagamento> pagamentoList) {
         this.pagamentoList = pagamentoList;
+    }
+
+    public Date getAnaDtReceb() {
+        return anaDtReceb;
+    }
+
+    public void setAnaDtReceb(Date anaDtReceb) {
+        this.anaDtReceb = anaDtReceb;
     }
     
 }

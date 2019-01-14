@@ -79,10 +79,34 @@ import javax.xml.bind.annotation.XmlTransient;
             query = "SELECT c FROM Checkpoint c WHERE (c.pbuId = :pbuId) AND (c.cktId IN (15)) AND (c.pckAtivo = 1)"),
     
     @NamedQuery(name = "Checkpoint.findCheckpointParaVoltar", 
-            query = "SELECT c FROM Checkpoint c WHERE c.pckId = (SELECT MAX(c1.pckId) FROM Checkpoint c1 WHERE (c1.pbuId = :pbuId) AND (c1.cktId IN (3,4)) AND (c1.pckAtivo = 1) AND (c1.ageId.agsId IN (2)))")
+            query = "SELECT c FROM Checkpoint c WHERE c.pckId = (SELECT MAX(c1.pckId) FROM Checkpoint c1 WHERE (c1.pbuId = :pbuId) AND (c1.cktId IN (3,4)) AND (c1.pckAtivo = 1) AND (c1.ageId.agsId IN (2)))"),
     
+    @NamedQuery(name = "Checkpoint.updateImagemCheckpoint", 
+                query = "UPDATE Checkpoint c SET c.pckImagem = :pckImagem WHERE c.pckIdAprovado.pckId = :pckId"),
+        
+    @NamedQuery(name = "Checkpoint.updateBatch", 
+                query = "UPDATE Checkpoint c SET c.pckDescricao = :pckDescricao, c.pckLegendaFoto = :pckLegendaFoto, c.pckImagem = :pckImagem, c.pckRelatorio = :pckRelatorio WHERE (c.pckIdAprovado.pckId = :pckId) OR (c.pckId = :pckId)"),
+        
+    @NamedQuery(name = "Checkpoint.updateBatchDeleteFoto", 
+                query = "UPDATE Checkpoint c SET c.pckLegendaFoto = NULL, c.pckImagem = NULL, c.pckRelatorio = 0 WHERE (c.pckIdAprovado.pckId = :pckId) OR (c.pckId = :pckId)"),
+
+    @NamedQuery(name = "Checkpoint.deleteBatchSlave", 
+                query = "DELETE FROM Checkpoint c WHERE (c.pckIdAprovado.pckId = :pckId)"),
+    
+    @NamedQuery(name = "Checkpoint.deleteBatchMaster", 
+                query = "DELETE FROM Checkpoint c WHERE (c.pckId = :pckId)")
+
+        
+        
 })
 public class Checkpoint implements Serializable {
+
+    @Column(name = "pck_dt_pre")
+    @Temporal(TemporalType.DATE)
+    private Date pckDtPre;
+    @JoinColumn(name = "pbs_id_pre", referencedColumnName = "pbs_id")
+    @ManyToOne
+    private Pedbusit pbsIdPre;
 
     @Size(max = 50)
     @Column(name = "pck_recup_cidade")
@@ -493,6 +517,22 @@ public class Checkpoint implements Serializable {
     public void setLocNuRecup(CepLocalidade locNuRecup) {
         this.locNuRecup = locNuRecup;
         this.setPckRecupCidade(locNuRecup.getLocNo());
+    }
+
+    public Date getPckDtPre() {
+        return pckDtPre;
+    }
+
+    public void setPckDtPre(Date pckDtPre) {
+        this.pckDtPre = pckDtPre;
+    }
+
+    public Pedbusit getPbsIdPre() {
+        return pbsIdPre;
+    }
+
+    public void setPbsIdPre(Pedbusit pbsIdPre) {
+        this.pbsIdPre = pbsIdPre;
     }
     
 }

@@ -13,6 +13,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -22,16 +24,16 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-/**
- *
- * @author root
- */
 @Entity
 @Table(name = "cor")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Cor.findAll", query = "SELECT c FROM Cor c")})
 public class Cor implements Serializable {
+
+    @JoinColumn(name = "cto_id", referencedColumnName = "cto_id")
+    @ManyToOne(optional = false)
+    private Cortodas ctoId;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -44,9 +46,9 @@ public class Cor implements Serializable {
     @Size(min = 1, max = 50)
     @Column(name = "cor_nome")
     private String corNome;
-    @Size(max = 6)
-    @Column(name = "cor_codigo")
-    private String corCodigo;
+//    @Size(max = 6)
+//    @Column(name = "cor_codigo")
+//    private String corCodigo;
     @OneToMany(mappedBy = "corId")
     private List<Analise> analiseList;
 
@@ -78,13 +80,13 @@ public class Cor implements Serializable {
         this.corNome = corNome;
     }
 
-    public String getCorCodigo() {
-        return corCodigo;
-    }
+//    public String getCorCodigo() {
+//        return corCodigo;
+//    }
 
-    public void setCorCodigo(String corCodigo) {
-        this.corCodigo = corCodigo;
-    }
+//    public void setCorCodigo(String corCodigo) {
+//        this.corCodigo = corCodigo;
+//    }
 
     @XmlTransient
     public List<Analise> getAnaliseList() {
@@ -117,6 +119,14 @@ public class Cor implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.Cor[ corId=" + corId + " ]";
+    }
+
+    public Cortodas getCtoId() {
+        return ctoId;
+    }
+
+    public void setCtoId(Cortodas ctoId) {
+        this.ctoId = ctoId;
     }
     
 }

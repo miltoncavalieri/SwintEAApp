@@ -24,6 +24,7 @@ import br.com.zaiac.swinteaapp.facade.ClienteFacade;
 import br.com.zaiac.swinteaapp.facade.ClientecobrancaFacade;
 import br.com.zaiac.swinteaapp.facade.ComissaoFacade;
 import br.com.zaiac.swinteaapp.facade.EstadoFacade;
+import br.com.zaiac.swinteaapp.facade.OperacaoFacade;
 import br.com.zaiac.swinteaapp.facade.PagamentoFacade;
 import br.com.zaiac.swinteaapp.facade.PbsubstatusFacade;
 import br.com.zaiac.swinteaapp.facade.PedbusFacade;
@@ -37,8 +38,12 @@ import br.com.zaiac.swinteaapp.facade.VwPagrecInvestigadoFacade;
 import br.com.zaiac.swinteaapp.facade.VwPedbusPagoRecebidoFacade;
 import br.com.zaiac.swinteaapp.views.VwPagrecInvestigado;
 import br.com.zaiac.swinteaapp.views.VwPedbusPagoRecebido;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -49,12 +54,12 @@ import javax.ejb.TransactionAttribute;
 import static javax.ejb.TransactionAttributeType.MANDATORY;
 import javax.ejb.TransactionManagement;
 import static javax.ejb.TransactionManagementType.CONTAINER;
+import javax.imageio.ImageIO;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-//import static javax.transaction.Transactional.TxType.MANDATORY;
-//import javax.transaction.Transactional;
+import org.apache.commons.io.FilenameUtils;
 
 @Stateless
 
@@ -372,9 +377,7 @@ public class EJBOperacao implements EJBOperacaoRemote {
         checkpoint.setFasId(pedbusfaseJpa.findByFasId((short)2));
         if ((vwPedbusPagoRecebido.getPbsId() == 2) && ((vwPedbusPagoRecebido.getLcbId() != null) || (vwPedbusPagoRecebido.getLopId() != null))) {
             checkpoint.setAgeId(agenteNew);
-            System.out.println("Entrou 4: ");
         } else {
-            System.out.println("Entrou 5: ");
             checkpoint.setAgeId(agente);
             agenteJpa.updateByAgeIdSetPckIdNull(vwPedbusPagoRecebido.getAgeId());  
         }
@@ -726,7 +729,7 @@ public class EJBOperacao implements EJBOperacaoRemote {
     
     @Override
     @TransactionAttribute(MANDATORY)
-    public void trocarAgente(Long pPbuId, Integer pUsuIdLogin, Short pAgsId, Integer pUsuIdDestino, Short pEstIdInvest, Long pLocNuInvest) throws Exception {
+    public void trocarAgente(Long pPbuId, Integer pUsuIdLogin, Short pAgsId, Integer pUsuIdDestino, Short pEstIdInvest, Long pLocNuInvest, Integer pOpeId) throws Exception {
         AnaliseFacade analiseJpa = new AnaliseFacade();
         PedbusFacade pedbusJpa = new PedbusFacade();
         UsuarioFacade usuarioJpa = new UsuarioFacade();
@@ -741,6 +744,8 @@ public class EJBOperacao implements EJBOperacaoRemote {
         PedbusitFacade pedbusitJpa = new PedbusitFacade();
         EstadoFacade estadoJpa = new EstadoFacade();
         CepLocalidadeFacade cepLocalidadeJpa = new CepLocalidadeFacade();
+        OperacaoFacade operacaoJpa = new OperacaoFacade();
+        
 //        EquipeFacade equipeJpa = new EquipeFacade();
         
         checkpointJpa.setEm(em);
@@ -757,6 +762,7 @@ public class EJBOperacao implements EJBOperacaoRemote {
         pedbusitJpa.setEm(em);
         estadoJpa.setEm(em);
         cepLocalidadeJpa.setEm(em);
+        operacaoJpa.setEm(em);
 //        equipeJpa.setEm(em);
         
         Analise analise = analiseJpa.findByPbuId(pPbuId);
@@ -849,7 +855,8 @@ public class EJBOperacao implements EJBOperacaoRemote {
         pedbus.setEstIdInvest(estadoJpa.findByEstId(pEstIdInvest));
         CepLocalidade cepLocalidade = cepLocalidadeJpa.findByLocNu(pLocNuInvest);
         pedbus.setLocNuInvest(cepLocalidade);
-        pedbus.setPbuInvestCidade(cepLocalidade.getLocNo());        
+        pedbus.setPbuInvestCidade(cepLocalidade.getLocNo());  
+        pedbus.setOpeId(operacaoJpa.findByOpeId(pOpeId));
         pedbusJpa.edit(pedbus);        
     }
     
@@ -871,12 +878,15 @@ public class EJBOperacao implements EJBOperacaoRemote {
                                             Long pPckId, 
                                             String pPckDescricao,
                                             String pPckLegendaFoto,
-                                            short pCkpId, 
-                                            short pPusId,
-                                            short pEstIdRecup,
+                                            Short pCkpId, 
+                                            Short pPusId,
+                                            Short pEstIdRecup,
                                             Long pLocNuRecup,
                                             Integer pUsuIdLogin,
-                                            Long pPbuId) {
+                                            Long pPbuId,
+                                            String pBatchOperacao,
+                                            String pExtFilename,
+                                            String pPckImagem) throws Exception {
 /*
 Operação: INSERT
           UPDATE 
@@ -900,9 +910,7 @@ Operação: INSERT
         PbsubstatusFacade pbsubstatusJpa = new PbsubstatusFacade();
         CepLocalidadeFacade cepLocalidadeJpa = new CepLocalidadeFacade();
         EstadoFacade estadoJpa = new EstadoFacade();
-        VwPagrecInvestigadoFacade vwPagrecInvestigadoJpa = new VwPagrecInvestigadoFacade();
-        
-        
+        VwPagrecInvestigadoFacade vwPagrecInvestigadoJpa = new VwPagrecInvestigadoFacade();    
         
         checkpointJpa.setEm(em);
         ckptipoJpa.setEm(em);
@@ -931,14 +939,67 @@ Operação: INSERT
         Agente agenteAtivo = agenteJpa.findByPbuIdAgsIdAtivo(pedbus);
         Date dtsys = new Date(System.currentTimeMillis());
         
+
+        
+        try {
+            pBatchOperacao = pBatchOperacao.toUpperCase();
+            if (!("SN".contains(pBatchOperacao))) {
+                throw new Exception("Insercao em Batch para Operacao deverá ser S/N");
+            }
+        } catch (NullPointerException e) {
+            pBatchOperacao = "N";
+        }
+        
+        if (pedbus.getOpeId() == null) {
+            throw new Exception("Insercao em Batch para Operacao a Operação deverá ser definida no Pedido de Busca");
+        }
+        
         if (Operacao.equals("UPDATE")) {
-             checkpoint = checkpointJpa.findByPckId(pPckId);
-             checkpoint.setPckDescricao(pPckDescricao);
-             checkpoint.setPckLegendaFoto(pPckLegendaFoto);             
-             checkpointJpa.edit(checkpoint);
+            checkpoint = checkpointJpa.findByPckId(pPckId);             
+//            checkpoint.setPckDescricao(pPckDescricao);
+//            checkpoint.setPckLegendaFoto(pPckLegendaFoto);
+//            checkpointJpa.edit(checkpoint);
+            String pckImagem = checkpoint.getPckImagem();
+            Short pckRelatorio = checkpoint.getPckRelatorio();
+            
+            if (!(pPckImagem == null)) {
+                if (pPckImagem.length() > 0) {
+                    String diretorio = "/webserver/images/mobile/";
+                    NumberFormat format = new DecimalFormat("0000000000"); 
+                    pExtFilename = pExtFilename.toLowerCase();
+                
+                    InputStream is = ImageMgmt.encodeBase64ToImage(pPckImagem);
+                    BufferedImage im = ImageIO.read(is);
+                    
+                    if (checkpoint.getPckImagem() == null) {
+                        if (checkpoint.getPckIdAprovado() == null) {
+                            ImageIO.write(im, pExtFilename, new File(diretorio,  format.format(checkpoint.getPckId()) + "." + pExtFilename));
+                            pckImagem = format.format(checkpoint.getPckId()) + "." + pExtFilename;
+                        } else {
+                            ImageIO.write(im, pExtFilename, new File(diretorio,  format.format(checkpoint.getPckIdAprovado().getPckId()) + "." + pExtFilename));
+                            pckImagem = format.format(checkpoint.getPckIdAprovado().getPckId()) + "." + pExtFilename;
+                        }
+                    } else {
+                        File fil = new File(diretorio, checkpoint.getPckImagem());
+                        if (fil.exists()) {
+                            fil.delete();
+                        }
+                        ImageIO.write(im, pExtFilename, new File(diretorio,  checkpoint.getPckImagem()));
+                        pckImagem = checkpoint.getPckImagem();
+                    }             
+                    pckRelatorio = ((short) 1);
+                }
+            } 
+            if (checkpoint.getPckIdAprovado() == null) {
+                checkpointJpa.updateBatch(pPckId, pPckDescricao, pPckLegendaFoto, pckImagem, pckRelatorio);
+            } else {
+                checkpointJpa.updateBatch(checkpoint.getPckIdAprovado().getPckId(), pPckDescricao, pPckLegendaFoto, pckImagem, pckRelatorio);
+            }
+            
         } else if (Operacao.equals("INSERT")) {
             checkpoint = new Checkpoint();
             checkpoint.setPckDt(dtsys);
+            checkpoint.setEuiId(pedbus.getEuiId());
             checkpoint.setUsuIdCkp(usuarioJpa.findByUsuId(pUsuIdLogin));
             checkpoint.setPckRelatorio((short)0);
             checkpoint.setCktId(ckptipoJpa.findByCktId(pCkpId));
@@ -948,12 +1009,57 @@ Operação: INSERT
             checkpoint.setPckLegendaFoto(pPckLegendaFoto);
             checkpoint.setAgeId(agenteAtivo);
             checkpoint.setFasId(pedbusfaseJpa.findByFasId((short) 2));
-            checkpointJpa.create(checkpoint);    
+            checkpointJpa.create(checkpoint);
+            
+            if (!(pPckImagem == null)) {
+                if (pPckImagem.length() > 0) {
+                    String diretorio = "/webserver/images/mobile/";
+                    NumberFormat format = new DecimalFormat("0000000000"); 
+                    pExtFilename = pExtFilename.toLowerCase();
+                
+                    InputStream is = ImageMgmt.encodeBase64ToImage(pPckImagem);
+                    BufferedImage im = ImageIO.read(is);
+                    checkpoint.setPckRelatorio((short) 1);
+                    ImageIO.write(im, pExtFilename, new File(diretorio,  format.format(checkpoint.getPckId()) + "." + pExtFilename));
+                    checkpoint.setPckImagem(format.format(checkpoint.getPckId()) + "." + pExtFilename);
+                    checkpoint.setPckRelatorio((short) 1);
+                }
+            } else {
+                checkpoint.setPckRelatorio((short) 0);
+            }
+            checkpointJpa.edit(checkpoint);
         }
         
         if (pCkpId == 2) {
             pedbus.setPusId(pbsubstatusJpa.findPusId(pPusId));
             pedbusJpa.edit(pedbus);
+            
+            checkpoint.setOpeId(pedbus.getOpeId());
+            
+            if (pBatchOperacao.equals("S")) {
+                if (Operacao.equals("INSERT")) {
+                    List<Analise> analises = analiseJpa.findPbEmCampoPorOperacao(pedbus.getOpeId());
+                    for (Analise ana : analises) {
+                        if (ana.getPbuId().compareTo(analise.getPbuId()) != 0) {
+                            Checkpoint checkpointBatch = new Checkpoint();
+                            checkpointBatch.setPckDt(dtsys);
+                            checkpointBatch.setUsuIdCkp(usuarioJpa.findByUsuId(pUsuIdLogin));
+                            checkpointBatch.setPckRelatorio(checkpoint.getPckRelatorio());
+                            checkpointBatch.setCktId(ckptipoJpa.findByCktId(pCkpId));
+                            checkpointBatch.setPbuId(ana);
+                            checkpointBatch.setPckAtivo((short) 1);
+                            checkpointBatch.setPckDescricao(pPckDescricao);
+                            checkpointBatch.setPckLegendaFoto(pPckLegendaFoto);
+                            checkpointBatch.setAgeId(agenteAtivo);
+                            checkpointBatch.setFasId(pedbusfaseJpa.findByFasId((short) 2));
+                            checkpointBatch.setOpeId(pedbus.getOpeId());
+                            checkpointBatch.setPckIdAprovado(checkpoint);
+                            checkpointBatch.setPckImagem(checkpoint.getPckImagem());
+                            checkpointJpa.create(checkpointBatch);     
+                        }
+                    }
+                }
+            }
             return checkpoint.getPckId();
         }
         
@@ -1045,29 +1151,28 @@ Operação: INSERT
             recebimento.setRcbValor(BigDecimal.valueOf(0));
         }
         recebimentoJpa.create(recebimento);
-        
+
         switch (pCkpId) {
-            case 2: 
-                pedbusJpa.edit(pedbus);
-                break;
             case 3: 
                 pedbus.setPbsId(pedbusitJpa.findByPbsId(Short.parseShort("2")));
                 pedbus.setPusId(pbsubstatusJpa.findPusId((short)5));
-                pedbusJpa.edit(pedbus);
                 break;
             case 4: 
                 pedbus.setPbsId(pedbusitJpa.findByPbsId(Short.parseShort("3")));
                 pedbus.setPusId(pbsubstatusJpa.findPusId((short)5));
-                pedbusJpa.edit(pedbus);
                 break;
         }
-        
         
         if (!(pedbus.getPbsIdPre() == null)) {
             if (pedbus.getPbsId().getPbsId().equals(pedbus.getPbsIdPre().getPbsId())) {
                 aprovarMudancaStatus(pedbus.getPbuId(), checkpoint.getPckId(), pUsuIdLogin , "AUTO");
+                checkpoint.setPbsIdPre(pedbus.getPbsIdPre());
+                checkpoint.setPckDtPre(pedbus.getPbuDtPre());                
+                pedbus.setPbsIdPre(null);
+                pedbus.setPbuDtPre(null);
             }
         }
+        pedbusJpa.edit(pedbus);        
         return checkpoint.getPckId();
     }    
 
@@ -1076,6 +1181,34 @@ Operação: INSERT
         return "/webserver/pb/" + dateFormat.format(pbuDt) + "/" + pbuId + "/" + subdir + "/";
     }
     
+    
+    @Override
+    @TransactionAttribute(MANDATORY)
+    public void excluirFotoCheckpointMobile(Long pPckId) throws Exception {
+        CheckpointFacade checkpointJpa  = new CheckpointFacade();
+        checkpointJpa.setEm(em);
+        Checkpoint checkpoint = checkpointJpa.findByPckId(pPckId);
+        String diretorio = "/webserver/images/mobile/";
+        File f = new File(diretorio, checkpoint.getPckImagem());
+        if (f.exists()) {
+            f.delete();
+        }
+        checkpointJpa.updateBatchDeleteFoto(pPckId);
+    }    
+    
+    @Override
+    @TransactionAttribute(MANDATORY)
+    public void excluirCheckpointMobile(Long pPckId) throws Exception {
+        CheckpointFacade checkpointJpa  = new CheckpointFacade();
+        checkpointJpa.setEm(em);
+        Checkpoint checkpoint = checkpointJpa.findByPckId(pPckId);
+        String diretorio = "/webserver/images/mobile/";
+        File f = new File(diretorio, checkpoint.getPckImagem());
+        if (f.exists()) {
+            f.delete();
+        }
+        checkpointJpa.deleteBatch(pPckId);
+    }    
     
     
     

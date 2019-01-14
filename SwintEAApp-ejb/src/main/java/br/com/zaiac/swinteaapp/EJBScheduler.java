@@ -97,7 +97,7 @@ public class EJBScheduler {
     @Schedule(dayOfWeek = "*", hour = "*", minute = "*/5", year="*", persistent = false)
 //    @Schedule(dayOfWeek = "*", hour = "*", minute = "*/2", year="*", persistent = false)    
     public void enviaEmailAgente() throws Exception, NamingException, NoClassDefFoundError {
-        logger.log(Level.INFO, "Checking for Send-Email to Agente Versão 1.7");
+        logger.log(Level.INFO, "Checking for Send-Email to Agente Versão 1.8");
         
         PedbusFacade pedbusJpa = new PedbusFacade();
         VwPedbusEnvioFacade vwPedbusEnvioJpa = new VwPedbusEnvioFacade();

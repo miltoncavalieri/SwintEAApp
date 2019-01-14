@@ -34,6 +34,10 @@ import javax.xml.bind.annotation.XmlTransient;
 })
 public class Pedbus implements Serializable {
 
+    @Column(name = "pbu_dt_pre")
+    @Temporal(TemporalType.DATE)
+    private Date pbuDtPre;
+
     @Column(name = "pbu_erro_envio")
     private Short pbuErroEnvio;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "pbuId")
@@ -444,6 +448,14 @@ public class Pedbus implements Serializable {
 
     public void setReciboList(List<Recibo> reciboList) {
         this.reciboList = reciboList;
+    }
+
+    public Date getPbuDtPre() {
+        return pbuDtPre;
+    }
+
+    public void setPbuDtPre(Date pbuDtPre) {
+        this.pbuDtPre = pbuDtPre;
     }
     
 }

@@ -9,6 +9,7 @@ import br.com.zaiac.swinteaapp.views.VwCheckpointStatusAprovado;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 public class CheckpointFacade extends AbstractFacade<Checkpoint>{
@@ -176,5 +177,52 @@ public class CheckpointFacade extends AbstractFacade<Checkpoint>{
         return (Checkpoint) query.getSingleResult();
     }
     
+    public Integer updateImagemCheckpoint(Long pckId, String pckImagem) {
+        Query queryUpdate = getEm().createNamedQuery("Checkpoint.updateImagemCheckpoint");
+        queryUpdate.setParameter("pckId", pckId);
+        queryUpdate.setParameter("pckImagem", pckImagem);
+        return queryUpdate.executeUpdate();
+    }
+    
+    
+    public Integer updateBatch(Long pckId, String pckDescricao, String pckLegendaFoto, String pckImagem, Short pckRelatorio) {
+        Query queryUpdate = getEm().createNamedQuery("Checkpoint.updateBatch");
+        queryUpdate.setParameter("pckId", pckId);
+        queryUpdate.setParameter("pckDescricao", pckDescricao);
+        queryUpdate.setParameter("pckLegendaFoto", pckLegendaFoto);
+        queryUpdate.setParameter("pckImagem", pckImagem);
+        queryUpdate.setParameter("pckRelatorio", pckRelatorio);        
+        return queryUpdate.executeUpdate();
+    }
+    
+    public Integer updateBatchDeleteFoto(Long pckId) {
+        Query queryUpdate = getEm().createNamedQuery("Checkpoint.updateBatchDeleteFoto");
+        queryUpdate.setParameter("pckId", pckId);
+        return queryUpdate.executeUpdate();
+    }
+    
+    public void deleteBatch(Long pckId) {
+        try {
+            Query query = getEm().createNamedQuery("Checkpoint.findByPckId");
+            query.setParameter("pckId", pckId);
+            
+            Checkpoint checkpoint = (Checkpoint) query.getSingleResult();
+            
+            if (!(checkpoint.getPckIdAprovado() == null)) {
+                pckId = checkpoint.getPckIdAprovado().getPckId();
+            }
+            Query queryUpdateSlave = getEm().createNamedQuery("Checkpoint.deleteBatchSlave");
+            queryUpdateSlave.setParameter("pckId", pckId);
+            queryUpdateSlave.executeUpdate();
+        
+            Query queryUpdateMaster = getEm().createNamedQuery("Checkpoint.deleteBatchMaster");
+            queryUpdateMaster.setParameter("pckId", pckId);        
+            queryUpdateMaster.executeUpdate();
+            
+        } catch (NoResultException e) {
+            
+        }
+        
+    }
     
 }

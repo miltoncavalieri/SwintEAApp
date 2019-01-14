@@ -24,6 +24,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Pedbusit.findByPbsId", query = "SELECT p FROM Pedbusit p WHERE p.pbsId = :pbsId")})
 public class Pedbusit implements Serializable {
 
+    @OneToMany(mappedBy = "pbsIdPre")
+    private List<Checkpoint> checkpointList;
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -108,6 +111,15 @@ public class Pedbusit implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.Pedbusit[ pbsId=" + pbsId + " ]";
+    }
+
+    @XmlTransient
+    public List<Checkpoint> getCheckpointList() {
+        return checkpointList;
+    }
+
+    public void setCheckpointList(List<Checkpoint> checkpointList) {
+        this.checkpointList = checkpointList;
     }
     
 }

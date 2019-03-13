@@ -45,6 +45,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -59,7 +60,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import org.apache.commons.io.FilenameUtils;
 
 @Stateless
 
@@ -184,12 +184,9 @@ public class EJBOperacao implements EJBOperacaoRemote {
 
 /*
     
-    
 +------------------------------------------------------------------------------+
 !                        Cancelar mudança de Status de PB                      !
 +------------------------------------------------------------------------------+
-    
-    
     
 */    
     
@@ -470,8 +467,7 @@ public class EJBOperacao implements EJBOperacaoRemote {
 !                                Reprovar relatorio                            !
 +------------------------------------------------------------------------------+
     
-    
-    
+
 */    
     
 
@@ -613,9 +609,21 @@ public class EJBOperacao implements EJBOperacaoRemote {
         CheckpointFacade checkpointJpa  = new CheckpointFacade();
         RecebimentoFacade recebimentoJpa = new RecebimentoFacade();
         
-        Date dtsys = new Date(System.currentTimeMillis());
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.MILLISECOND, 0);        
+        calendar.set(Calendar.SECOND, 0);        
+        calendar.set(Calendar.MINUTE, 0);        
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
         
-        if (dtsys.after(pPpckDtPromdev)) {
+//        Calendar cPpckDtPromdev = Calendar.getInstance();
+//        cPpckDtPromdev.setTime(pPpckDtPromdev);
+        
+        Date dtsys = calendar.getTime();
+        
+//        System.out.println("dtsys " + dtsys);
+//        System.out.println("pPpckDtPromdev " + pPpckDtPromdev);
+        
+        if (!((pPpckDtPromdev.after(dtsys)) || pPpckDtPromdev.compareTo(dtsys) == 0)) {
            throw new Exception ("Data anterior a data de hoje");
         }
         
@@ -939,8 +947,6 @@ Operação: INSERT
         Agente agenteAtivo = agenteJpa.findByPbuIdAgsIdAtivo(pedbus);
         Date dtsys = new Date(System.currentTimeMillis());
         
-
-        
         try {
             pBatchOperacao = pBatchOperacao.toUpperCase();
             if (!("SN".contains(pBatchOperacao))) {
@@ -956,9 +962,6 @@ Operação: INSERT
         
         if (Operacao.equals("UPDATE")) {
             checkpoint = checkpointJpa.findByPckId(pPckId);             
-//            checkpoint.setPckDescricao(pPckDescricao);
-//            checkpoint.setPckLegendaFoto(pPckLegendaFoto);
-//            checkpointJpa.edit(checkpoint);
             String pckImagem = checkpoint.getPckImagem();
             Short pckRelatorio = checkpoint.getPckRelatorio();
             
@@ -1063,6 +1066,17 @@ Operação: INSERT
             return checkpoint.getPckId();
         }
         
+        try {
+            Checkpoint checkpointProvDevAtiva = checkpointJpa.findPromessaDevolucaoAtiva(analise);
+            if (pCkpId == 3) { 
+                throw new Exception("Veiculo com promessa de devolução não pode ser INVESTIGADO");                
+            }
+            pbDevolucaoVeiculo(analise.getPbuId(), checkpoint.getPckDt(), "Recuperado pelo Agente", pUsuIdLogin);
+        } catch (NoResultException e) {
+            
+        }
+        
+        
         CepLocalidade cepLocalidade = cepLocalidadeJpa.findByLocNu(pLocNuRecup);
         checkpoint.setLocNuRecup(cepLocalidade);
         checkpoint.setPckRecupCidade(cepLocalidade.getLocNo());
@@ -1075,6 +1089,7 @@ Operação: INSERT
         agenteAtivo.setPckId(checkpoint);
         agenteJpa.edit(agenteAtivo);
         
+               
         
         Tipopag tipopag = null;
         

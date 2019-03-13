@@ -72,6 +72,7 @@ import javax.xml.bind.annotation.XmlTransient;
     
     @NamedQuery(name = "Checkpoint.updateClearPromdev", 
             query = "UPDATE Checkpoint c SET c.pckAtivo = 0 WHERE (c.pbuId = :pbuId) AND (c.cktId IN(14,15))"),
+    
     @NamedQuery(name = "Checkpoint.findPromessaDevolucaoAtiva", 
             query = "SELECT c FROM Checkpoint c WHERE (c.pbuId = :pbuId) AND (c.cktId IN (14)) AND (c.pckAtivo = 1)"),
     

@@ -3,6 +3,7 @@ package br.com.zaiac.swinteaapp.facade;
 import br.com.zaiac.swinteaapp.entities.Agente;
 import br.com.zaiac.swinteaapp.entities.Checkpoint;
 import br.com.zaiac.swinteaapp.entities.Pedbus;
+import br.com.zaiac.swinteaapp.entities.Usuario;
 import br.com.zaiac.swinteaapp.session.AbstractFacade;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -51,4 +52,15 @@ public class AgenteFacade extends AbstractFacade<Agente>{
         return query.executeUpdate();
     }
     
+    public Boolean findAgenteAtivo (Pedbus pbuId, Usuario usuId) {
+        Query query = getEm().createNamedQuery("Agente.findAgenteAtivo");
+        query.setParameter("pbuId", pbuId);
+        query.setParameter("usuId", usuId);
+        Long i = (Long) query.getSingleResult();
+        if ( i > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

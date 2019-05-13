@@ -19,9 +19,8 @@ import br.com.zaiac.swinteaapp.views.VwPedbusEnvio;
 import javax.ejb.LocalBean;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.Serializable;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -29,20 +28,15 @@ import java.util.logging.Logger;
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.annotation.Resource;
-//import static javax.ejb.ConcurrencyManagementType.BEAN;
 import javax.ejb.Schedule;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import static javax.ejb.TransactionManagementType.BEAN;
 import javax.inject.Inject;
-//import javax.inject.Inject;
-//import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-//import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
-//import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -83,8 +77,10 @@ import javax.transaction.UserTransaction;
 
 @TransactionManagement(BEAN)
 
-public class EJBScheduler {
+public class EJBScheduler implements Serializable {
     private static final Logger logger = Logger.getLogger(EJBScheduler.class.getName());
+    private static boolean isRunningEnviaEmailAgente = false;
+
     @PersistenceContext(unitName = "SwintService", type=PersistenceContextType.TRANSACTION)
     private EntityManager em;
     
@@ -96,8 +92,15 @@ public class EJBScheduler {
     
     @Schedule(dayOfWeek = "*", hour = "*", minute = "*/5", year="*", persistent = false)
 //    @Schedule(dayOfWeek = "*", hour = "*", minute = "*/2", year="*", persistent = false)    
-    public void enviaEmailAgente() throws Exception, NamingException, NoClassDefFoundError {
-        logger.log(Level.INFO, "Checking for Send-Email to Agente Versão 1.8");
+    public void enviaEmailAgente() 
+            throws Exception, NamingException, NoClassDefFoundError {
+        logger.log(Level.INFO, "Checking for Send-Email to Agente Versão 1.9");
+        
+        if (isRunningEnviaEmailAgente) {
+            logger.log(Level.INFO, "-----> Already running");
+        }
+        
+        isRunningEnviaEmailAgente = true;
         
         PedbusFacade pedbusJpa = new PedbusFacade();
         VwPedbusEnvioFacade vwPedbusEnvioJpa = new VwPedbusEnvioFacade();
@@ -144,7 +147,6 @@ public class EJBScheduler {
         Connection conn = ds.getConnection();
         
         try {
-            tx.begin();
             
             MimeMessage msg = new MimeMessage(session);
             MimeMultipart multipart = new MimeMultipart();
@@ -155,6 +157,8 @@ public class EJBScheduler {
             
             
             for (VwPedbusEnvio pb : vwPedbusEnvios) {
+                tx.begin();
+                
                 analise = analiseJpa.findByPbuId(pb.getPbuId());
                 pedbus = pedbusJpa.findByPbuId(pb.getPbuId());
                 enviado = Boolean.TRUE;
@@ -165,7 +169,7 @@ public class EJBScheduler {
                     continue;
                 }
                 
-                msg.setFrom("gerencia@zaiac.com.br");
+                msg.setFrom("swint@swint.com.br");
                 String subject = pb.getReferencia();
 
                 msg.setSubject(subject);
@@ -180,7 +184,8 @@ public class EJBScheduler {
                 linhaHTML = "<body>"
                           + "<p>Prezado agente <b>" + vwPbemailtocc.getUsuNome() + "</b></p>"
                           + "<p>Estamos enviando o PB <b>" + pb.getPbuId() + "</b> juntamente com a(s) documentacao(oes) necessaria(s)"
-                          + " para sua providencia.</p>";
+                          + " para sua providencia.</p>" 
+                          + "<p>POR FAVOR, NÃO RESPONDER ESTA MENSAGEM</p>";
                 if (vwPbemailtocc.getUsuCoordenador() != null) {
                     linhaHTML = linhaHTML                          
                               + "<p>O Coodenador <b> " + vwPbemailtocc.getUsuCoordenador() + "</b> Foi copiado neste e-mail."
@@ -251,36 +256,43 @@ public class EJBScheduler {
                     logger.log(Level.WARNING,"Failed to send e-mail Pedbus: {0} Message: {1}", new Object[]{pb.getPbuId(), e.toString()});                    
                 }
                 
+                tx.commit();
+                
             }
-            tx.commit();
             conn.close();
         } catch (MessagingException e) {
             logger.log(Level.WARNING,"Failed to send e-mail" + e.toString());
+            isRunningEnviaEmailAgente = false;
         } catch (Exception e) {
-                        if (
-                            (e instanceof NotSupportedException) ||
-                            (e instanceof SystemException) ||     
-                            (e instanceof RollbackException) ||     
-                            (e instanceof HeuristicMixedException) ||     
-                            (e instanceof HeuristicRollbackException)
-                            ) {  
-                            throw new Exception(e);
-                        } else {
-                            tx.rollback();
-                            throw new Exception (e);
-                        }
-                    }
+            if (
+                (e instanceof NotSupportedException) ||
+                (e instanceof SystemException) ||     
+                (e instanceof RollbackException) ||     
+                (e instanceof HeuristicMixedException) ||     
+                (e instanceof HeuristicRollbackException)
+                ) {  
+                isRunningEnviaEmailAgente = false;
+                throw new Exception(e);
+            } else {
+                tx.rollback();
+                isRunningEnviaEmailAgente = false;
+                throw new Exception (e);
+            }            
+        }
 
 
         if (!enviado) {
            logger.log(Level.INFO, "There are not e-mail to be send"); 
         }
+        isRunningEnviaEmailAgente = false;
+        
         vwPedbusEnvios.clear();
         dbparams.clear();
         
         vwPedbusEnvios = null;
         dbparams = null;
         System.gc();
+        
     }
     
 

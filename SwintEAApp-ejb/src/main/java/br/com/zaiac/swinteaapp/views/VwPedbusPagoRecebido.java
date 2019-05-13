@@ -1,6 +1,8 @@
 package br.com.zaiac.swinteaapp.views;
 
 import java.io.Serializable;
+import java.math.BigInteger;
+import java.util.Date;
 //import java.math.BigInteger;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -9,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -25,24 +29,30 @@ public class VwPedbusPagoRecebido implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Column(name = "age_id")
-    private Long ageId;
+    private long ageId;
     @Basic(optional = false)
     @NotNull
     @Column(name = "pag_id")
     private Long pagId;
+    @Column(name = "lcb_id")
+    private Long lcbId;
+    @Column(name = "lcb_dt_pagto")
+    @Temporal(TemporalType.DATE)
+    private Date lcbDtPagto;
+    @Column(name = "lop_id")
+    private Long lopId;
+    @Column(name = "lop_dt_pagto")
+    @Temporal(TemporalType.DATE)
+    private Date lopDtPagto;
     @Basic(optional = false)
     @NotNull
     @Column(name = "rcb_id")
-    private long rcbId;
-    @Column(name = "lcb_id")
-    private Long lcbId;
-    @Column(name = "lop_id")
-    private Long lopId;
+    private Long rcbId;
 
     @Basic(optional = false)
     @NotNull
     @Column(name = "pck_id")
-    private long pckId;
+    private Long pckId;
     @Basic(optional = false)
     @NotNull
     @Column(name = "ckt_id")
@@ -223,11 +233,11 @@ public class VwPedbusPagoRecebido implements Serializable {
 //        this.pbuIdLigado = pbuIdLigado;
 //    }
 
-    public long getPckId() {
+    public Long getPckId() {
         return pckId;
     }
 
-    public void setPckId(long pckId) {
+    public void setPckId(Long pckId) {
         this.pckId = pckId;
     }
 
@@ -271,11 +281,28 @@ public class VwPedbusPagoRecebido implements Serializable {
         this.pckAprovadoms = pckAprovadoms;
     }
 
-    public long getAgeId() {
+    public Long getAgeId() {
         return ageId;
     }
 
-    public void setAgeId(long ageId) {
+    public void setAgeId(Long ageId) {
         this.ageId = ageId;
+    }
+
+
+    public Date getLcbDtPagto() {
+        return lcbDtPagto;
+    }
+
+    public void setLcbDtPagto(Date lcbDtPagto) {
+        this.lcbDtPagto = lcbDtPagto;
+    }
+
+    public Date getLopDtPagto() {
+        return lopDtPagto;
+    }
+
+    public void setLopDtPagto(Date lopDtPagto) {
+        this.lopDtPagto = lopDtPagto;
     }
 }

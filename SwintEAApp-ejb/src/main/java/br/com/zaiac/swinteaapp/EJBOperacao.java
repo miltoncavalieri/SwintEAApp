@@ -314,6 +314,10 @@ public class EJBOperacao implements EJBOperacaoRemote {
             throw new Exception("Operacao nao encontrada PCK: " + checkpointParaVoltar.getPbuId().getPbuId());
         }
         
+//
+//        Se for Recuperado nao permitir voltar para campo
+//
+        
         if (vwPedbusPagoRecebido.getPbsId() == 3) {
             if (vwPedbusPagoRecebido.getLcbId() != null) {
                 logger.log(Level.SEVERE, "Operacao nao permitida para PB ja recebido/recuperado: {0} / {1}", new Object[]{checkpointParaVoltar.getPbuId().getPbuId(), checkpointParaVoltar.getPckId()});
@@ -325,15 +329,42 @@ public class EJBOperacao implements EJBOperacaoRemote {
                 throw new Exception("Operacao nao permitida para PB ja pago: "+ vwPedbusPagoRecebido + "/" + checkpointParaVoltar.getPbuId().getPbuId());
             }
         }
+        
+//
+//        Nao voltar para campo se ele ja estiver em campo
+//
+        
 
         if (vwPedbusPagoRecebido.getPbsId() == 1) {
             logger.log(Level.SEVERE, "Operacao nao permitida para PB em campo: {0} / {1}", new Object[]{checkpointParaVoltar.getPbuId().getPbuId(), checkpointParaVoltar.getPckId()});
-            throw new Exception("Operacao nao permitida para PB ja recebido: "+ vwPedbusPagoRecebido + "/" + checkpointParaVoltar.getPbuId().getPbuId());
+            throw new Exception("Operacao nao permitida para PB em campo: "+ vwPedbusPagoRecebido.getPbuId());
         }
 
         Agente agente = agenteJpa.findByPbuIdAgsIdAtivo(checkpointParaVoltar.getAgeId().getPbuId());
         Agente agenteNew = null;
         Integer ret;
+
+        if ((vwPedbusPagoRecebido.getPbsId() == 2)) {
+//            if ((vwPedbusPagoRecebido.getLcbId() != null) && (vwPedbusPagoRecebido.getLopId() != null)) {        
+//                logger.log(Level.SEVERE, "Operacao nao permitida para PB Pago/Recedigo: {0} / {1}", new Object[]{checkpointParaVoltar.getPbuId().getPbuId(), checkpointParaVoltar.getPckId()});
+//                throw new Exception("Operacao nao permitida para PB ja pago e recebido: "+ vwPedbusPagoRecebido.getPbuId() + "/" + checkpointParaVoltar.getPckId());
+//            }
+            if ((vwPedbusPagoRecebido.getLcbId() != null) && (vwPedbusPagoRecebido.getLopId() == null)) { 
+                logger.log(Level.SEVERE, "Operacao nao permitida para PB em andamento para recebimento do cliente: {0} / {1}. Remova este recebimento para voltar para campo", new Object[]{checkpointParaVoltar.getPbuId().getPbuId(), checkpointParaVoltar.getPckId()});
+                throw new Exception("Operacao nao permitida para PB em andamento para recebimento do cliente: "+ vwPedbusPagoRecebido.getPbuId() + "/" + checkpointParaVoltar.getPckId() + ". Remova este recebimento para voltar para campo");
+            }
+
+            if ((vwPedbusPagoRecebido.getLopId() != null) && (vwPedbusPagoRecebido.getLcbId() == null)) {        
+                logger.log(Level.SEVERE, "Operacao nao permitida para PB em andamento para pagamento para o agente: {0} / {1}. Remova este pagamento para voltar para campo", new Object[]{checkpointParaVoltar.getPbuId().getPbuId(), checkpointParaVoltar.getPckId()});
+                throw new Exception("Operacao nao permitida para PB em andamento para pagamento para o agente: "+ vwPedbusPagoRecebido.getPbuId() + "/" + checkpointParaVoltar.getPckId() + ". Remova este pagamento para voltar para campo");
+            }
+            if ((vwPedbusPagoRecebido.getLopId() != null) && (vwPedbusPagoRecebido.getLcbId() != null)) {        
+                if ((vwPedbusPagoRecebido.getLcbDtPagto() == null) || (vwPedbusPagoRecebido.getLopDtPagto() == null)) {
+                    logger.log(Level.SEVERE, "Operacao nao permitida para PB ja alocado para pagamento e recebimento: {0} / {1}. Remova o pagamento e recebimento para voltar para campo", new Object[]{checkpointParaVoltar.getPbuId().getPbuId(), checkpointParaVoltar.getPckId()});
+                    throw new Exception("Operacao nao permitida para PB ja alocado para pagamento e recebimento: "+ vwPedbusPagoRecebido.getPbuId() + "/" + checkpointParaVoltar.getPckId() + ". Remova o pagamento e recebimento para voltar para campo ou de baixa no pagamento/recebimento.");
+                }
+            }
+        }
         
         if ((vwPedbusPagoRecebido.getPbsId() == 2) && ((vwPedbusPagoRecebido.getLcbId() != null) || (vwPedbusPagoRecebido.getLopId() != null))) {
             agenteNew = new Agente();
@@ -383,8 +414,6 @@ public class EJBOperacao implements EJBOperacaoRemote {
         pedbusJpa.updatePbParaCampo(vwPedbusPagoRecebido.getPbuId());
         logger.log(Level.INFO, "Operacao permitida para PB: {0} / {1} - Volta para CAMPO", new Object[]{vwPedbusPagoRecebido.getPbuId(), pPckId});
     }
-    
-
 
 /*
     
@@ -697,31 +726,33 @@ public class EJBOperacao implements EJBOperacaoRemote {
         Pedbus pedbus = pedbusJpa.findByPbuId(pPbuId);
         Agente agente = agenteJpa.findByPbuIdAgsIdAtivo(pedbus);
         
-        Checkpoint checkpointPromDev = checkpointJpa.findPromessaDevolucaoAtiva(analise);
-
         try {
-            Checkpoint checkpointVeicDevAtivo = checkpointJpa.findVeiculoDevolvidoAtiva(analise);
-            checkpointVeicDevAtivo.setPckAtivo((short)0);
-            checkpointJpa.edit(checkpointVeicDevAtivo);
-        } catch (NoResultException e) {}
-        
-        Checkpoint checkpointNew = new Checkpoint();
-        checkpointNew.setPbuId(analise);
-        checkpointNew.setPckDt(dtsys);
-        checkpointNew.setUsuIdCkp(usuarioJpa.findByUsuId(pUsuId));
-        checkpointNew.setCktId(ckptipoJpa.findByCktId((short) 15));
-        checkpointNew.setPckRelatorio((short) 0);
-        checkpointNew.setAgeId(agente);
-        checkpointNew.setPckDescricao(pPpckDescricao);
-        checkpointNew.setPckDtPromdev(pPpckDtPromdev);
-        checkpointNew.setPckAtivo((short)1);
-        checkpointNew.setFasId(pedbusfaseJpa.findByFasId((short)2));
-        checkpointNew.setPckIdAprovado(checkpointPromDev);
-        checkpointNew.setEuiId(pedbus.getEuiId());
-        checkpointJpa.create(checkpointNew); 
-        
-        checkpointPromDev.setPckIdAprovado(checkpointNew);
-        checkpointJpa.edit(checkpointPromDev);
+            Checkpoint checkpointPromDev = checkpointJpa.findPromessaDevolucaoAtiva(analise);
+            try {
+                Checkpoint checkpointVeicDevAtivo = checkpointJpa.findVeiculoDevolvidoAtiva(analise);
+            } catch (NoResultException e) {
+                Checkpoint checkpointNew = new Checkpoint();
+                checkpointNew.setPbuId(analise);
+                checkpointNew.setPckDt(dtsys);
+                checkpointNew.setUsuIdCkp(usuarioJpa.findByUsuId(pUsuId));
+                checkpointNew.setCktId(ckptipoJpa.findByCktId((short) 15));
+                checkpointNew.setPckRelatorio((short) 0);
+                checkpointNew.setAgeId(agente);
+                checkpointNew.setPckDescricao(pPpckDescricao);
+                checkpointNew.setPckDtPromdev(pPpckDtPromdev);
+                checkpointNew.setPckAtivo((short)1);
+                checkpointNew.setFasId(pedbusfaseJpa.findByFasId((short)2));
+                checkpointNew.setPckIdAprovado(checkpointPromDev);
+                checkpointNew.setEuiId(pedbus.getEuiId());
+                checkpointJpa.create(checkpointNew); 
+                checkpointPromDev.setPckIdAprovado(checkpointNew);
+                checkpointJpa.edit(checkpointPromDev);
+            }
+            
+        } catch (NoResultException e) {
+            
+        }
+
     }
     
 /*
@@ -772,6 +803,7 @@ public class EJBOperacao implements EJBOperacaoRemote {
         cepLocalidadeJpa.setEm(em);
         operacaoJpa.setEm(em);
 //        equipeJpa.setEm(em);
+
         
         Analise analise = analiseJpa.findByPbuId(pPbuId);
         Pedbus pedbus = pedbusJpa.findByPbuId(pPbuId);
@@ -779,7 +811,12 @@ public class EJBOperacao implements EJBOperacaoRemote {
         Date dtsys = new Date(System.currentTimeMillis());
         
         Agente agenteAtivo = agenteJpa.findByPbuIdAgsIdAtivo(pedbus);
-        
+
+        if (agenteJpa.findAgenteAtivo(pedbusJpa.findByPbuId(pPbuId), usuarioJpa.findByUsuId(pUsuIdDestino))) {
+            if (pAgsId == 3) {
+                throw new Exception("Para este PB o agente já recebeu Investigacao");
+            }
+        }
         
         Checkpoint checkpoint = new Checkpoint();        
         Usuario usuarioAtivo = usuarioJpa.findByUsuId(agenteAtivo.getUsuId().getUsuId());
@@ -883,6 +920,7 @@ public class EJBOperacao implements EJBOperacaoRemote {
     @Override
     @TransactionAttribute(MANDATORY)
     public Long gravarCheckpointMobile(String Operacao, 
+                                            Short pFasId,
                                             Long pPckId, 
                                             String pPckDescricao,
                                             String pPckLegendaFoto,
@@ -918,7 +956,11 @@ Operação: INSERT
         PbsubstatusFacade pbsubstatusJpa = new PbsubstatusFacade();
         CepLocalidadeFacade cepLocalidadeJpa = new CepLocalidadeFacade();
         EstadoFacade estadoJpa = new EstadoFacade();
-        VwPagrecInvestigadoFacade vwPagrecInvestigadoJpa = new VwPagrecInvestigadoFacade();    
+        VwPagrecInvestigadoFacade vwPagrecInvestigadoJpa = new VwPagrecInvestigadoFacade();   
+        
+        Pedbus pedbus = null;
+        Analise analise = null;
+        Agente agenteAtivo = null;
         
         checkpointJpa.setEm(em);
         ckptipoJpa.setEm(em);
@@ -940,11 +982,18 @@ Operação: INSERT
         estadoJpa.setEm(em);
         vwPagrecInvestigadoJpa.setEm(em);
         
-        Analise analise = analiseJpa.findByPbuId(pPbuId);
-        Pedbus pedbus = pedbusJpa.findByPbuId(pPbuId);
+        analise = analiseJpa.findByPbuId(pPbuId);
+        if (pFasId == 2) {
+            pedbus = pedbusJpa.findByPbuId(pPbuId);
+            agenteAtivo = agenteJpa.findByPbuIdAgsIdAtivo(pedbus);
+        }
+        try {
+
+        } catch (NoResultException e) {
+            
+        }
         
         Checkpoint checkpoint = null;
-        Agente agenteAtivo = agenteJpa.findByPbuIdAgsIdAtivo(pedbus);
         Date dtsys = new Date(System.currentTimeMillis());
         
         try {
@@ -952,12 +1001,16 @@ Operação: INSERT
             if (!("SN".contains(pBatchOperacao))) {
                 throw new Exception("Insercao em Batch para Operacao deverá ser S/N");
             }
+            if (pFasId == 1) {
+                pBatchOperacao = "N";
+            }
         } catch (NullPointerException e) {
             pBatchOperacao = "N";
         }
-        
-        if (pedbus.getOpeId() == null) {
-            throw new Exception("Insercao em Batch para Operacao a Operação deverá ser definida no Pedido de Busca");
+        if (!(pedbus ==null)) {
+            if (pedbus.getOpeId() == null) {
+                throw new Exception("Insercao em Batch para Operacao a Operação deverá ser definida no Pedido de Busca");
+            }
         }
         
         if (Operacao.equals("UPDATE")) {
@@ -1002,7 +1055,7 @@ Operação: INSERT
         } else if (Operacao.equals("INSERT")) {
             checkpoint = new Checkpoint();
             checkpoint.setPckDt(dtsys);
-            checkpoint.setEuiId(pedbus.getEuiId());
+            checkpoint.setEuiId((pedbus == null) ? null : pedbus.getEuiId());
             checkpoint.setUsuIdCkp(usuarioJpa.findByUsuId(pUsuIdLogin));
             checkpoint.setPckRelatorio((short)0);
             checkpoint.setCktId(ckptipoJpa.findByCktId(pCkpId));
@@ -1011,7 +1064,7 @@ Operação: INSERT
             checkpoint.setPckDescricao(pPckDescricao);
             checkpoint.setPckLegendaFoto(pPckLegendaFoto);
             checkpoint.setAgeId(agenteAtivo);
-            checkpoint.setFasId(pedbusfaseJpa.findByFasId((short) 2));
+            checkpoint.setFasId(pedbusfaseJpa.findByFasId(pFasId));
             checkpointJpa.create(checkpoint);
             
             if (!(pPckImagem == null)) {
@@ -1034,10 +1087,12 @@ Operação: INSERT
         }
         
         if (pCkpId == 2) {
-            pedbus.setPusId(pbsubstatusJpa.findPusId(pPusId));
-            pedbusJpa.edit(pedbus);
+            if (pFasId == 2) {
+                pedbus.setPusId(pbsubstatusJpa.findPusId(pPusId));
+                pedbusJpa.edit(pedbus);
             
-            checkpoint.setOpeId(pedbus.getOpeId());
+                checkpoint.setOpeId(pedbus.getOpeId());
+            }
             
             if (pBatchOperacao.equals("S")) {
                 if (Operacao.equals("INSERT")) {
@@ -1054,7 +1109,7 @@ Operação: INSERT
                             checkpointBatch.setPckDescricao(pPckDescricao);
                             checkpointBatch.setPckLegendaFoto(pPckLegendaFoto);
                             checkpointBatch.setAgeId(agenteAtivo);
-                            checkpointBatch.setFasId(pedbusfaseJpa.findByFasId((short) 2));
+                            checkpointBatch.setFasId(pedbusfaseJpa.findByFasId(pFasId));
                             checkpointBatch.setOpeId(pedbus.getOpeId());
                             checkpointBatch.setPckIdAprovado(checkpoint);
                             checkpointBatch.setPckImagem(checkpoint.getPckImagem());
@@ -1066,17 +1121,8 @@ Operação: INSERT
             return checkpoint.getPckId();
         }
         
-        try {
-            Checkpoint checkpointProvDevAtiva = checkpointJpa.findPromessaDevolucaoAtiva(analise);
-            if (pCkpId == 3) { 
-                throw new Exception("Veiculo com promessa de devolução não pode ser INVESTIGADO");                
-            }
-            pbDevolucaoVeiculo(analise.getPbuId(), checkpoint.getPckDt(), "Recuperado pelo Agente", pUsuIdLogin);
-        } catch (NoResultException e) {
-            
-        }
-        
-        
+        pbDevolucaoVeiculo(analise.getPbuId(), checkpoint.getPckDt(), "Recuperado/Investigado pelo Agente", pUsuIdLogin);
+
         CepLocalidade cepLocalidade = cepLocalidadeJpa.findByLocNu(pLocNuRecup);
         checkpoint.setLocNuRecup(cepLocalidade);
         checkpoint.setPckRecupCidade(cepLocalidade.getLocNo());
@@ -1086,8 +1132,10 @@ Operação: INSERT
         checkpoint.setPckAprovadoms((short)0);
         checkpoint.setPckRelatoriofeito((short)0);
         
-        agenteAtivo.setPckId(checkpoint);
-        agenteJpa.edit(agenteAtivo);
+        if (pFasId == 2) {
+            agenteAtivo.setPckId(checkpoint);
+            agenteJpa.edit(agenteAtivo);
+        }
         
                
         
@@ -1218,9 +1266,12 @@ Operação: INSERT
         checkpointJpa.setEm(em);
         Checkpoint checkpoint = checkpointJpa.findByPckId(pPckId);
         String diretorio = "/webserver/images/mobile/";
-        File f = new File(diretorio, checkpoint.getPckImagem());
-        if (f.exists()) {
-            f.delete();
+        if (checkpoint.getPckImagem() != null) {
+            File f = new File(diretorio, checkpoint.getPckImagem());
+
+            if (f.exists()) {
+                f.delete();
+            }
         }
         checkpointJpa.deleteBatch(pPckId);
     }    

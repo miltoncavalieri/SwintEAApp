@@ -165,6 +165,31 @@ public class CheckpointFacade extends AbstractFacade<Checkpoint>{
         return query.executeUpdate();
     }
     
+    public Boolean checkPromessaDevolucaoAtiva(Analise pbuId) {
+        Query queryPv;
+        Query queryDv;
+        
+        Checkpoint ckpPv;
+        Checkpoint ckpDv;
+        try {
+            queryPv = getEm().createNamedQuery("Checkpoint.findPromessaDevolucaoAtiva");
+            queryPv.setParameter("pbuId", pbuId);
+            ckpPv = (Checkpoint) queryPv.getSingleResult();
+            
+            try {
+                queryDv = getEm().createNamedQuery("Checkpoint.findVeiculoDevolvidoAtiva");
+                queryDv.setParameter("pbuId", pbuId);
+                ckpDv = (Checkpoint) queryDv.getSingleResult();
+                return false;
+            } catch (NoResultException e) {
+                return true;
+            }
+        } catch (NoResultException e) {
+            return false;    
+        }
+    }
+    
+    
     public Checkpoint findPromessaDevolucaoAtiva(Analise pbuId) {
         Query query = getEm().createNamedQuery("Checkpoint.findPromessaDevolucaoAtiva");
         query.setParameter("pbuId", pbuId);

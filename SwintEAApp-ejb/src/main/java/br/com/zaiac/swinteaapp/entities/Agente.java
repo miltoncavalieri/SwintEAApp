@@ -31,7 +31,8 @@ import javax.xml.bind.annotation.XmlTransient;
             query = "SELECT a FROM Agente a WHERE (a.pbuId = :pbuId) AND (a.agsId = 2) AND a.ageDtDesignacao = (SELECT MAX(a1.ageDtDesignacao) FROM Agente a1 WHERE a1.pbuId = a.pbuId)"),
     @NamedQuery(name = "Agente.findByPckIdAgsIdCheckpoint", query = "SELECT a FROM Agente a WHERE (a.pckId = :pckId) AND (a.agsId IN (2,3))"),
     @NamedQuery(name = "Agente.updateByAgeIdSetPckIdNull", query = "UPDATE Agente a SET a.pckId = null WHERE a.ageId = :ageId"),
-    @NamedQuery(name = "Agente.deleteByAgeId", query = "DELETE FROM Agente a WHERE a.ageId = :ageId")
+    @NamedQuery(name = "Agente.deleteByAgeId", query = "DELETE FROM Agente a WHERE a.ageId = :ageId"),
+    @NamedQuery(name = "Agente.findAgenteAtivo", query = "SELECT COUNT(1) FROM Agente a WHERE a.pbuId = :pbuId and a.usuId = :usuId and ags_id in (2,3)"),
 
 })
 public class Agente implements Serializable {

@@ -73,47 +73,15 @@ public class Pedbus implements Serializable {
     @Size(max = 50)
     @Column(name = "pbu_invest_cidade")
     private String pbuInvestCidade;
-//    @Basic(optional = false)
-//    @NotNull
-//    @Column(name = "pbu_checkpoint")
-//    private short pbuCheckpoint;
-//    @Basic(optional = false)
-//    @NotNull
-//    @Column(name = "pbu_investigado")
-//    private short pbuInvestigado;
-//   @Basic(optional = false)
-//    @NotNull
-//    @Column(name = "pbu_recuperado")
-//    private short pbuRecuperado;
-//    @Basic(optional = false)
-//    @NotNull
-//    @Column(name = "pbu_relatorio")
-//    private short pbuRelatorio;
-//    @Size(max = 50)
-//    @Column(name = "pbu_recup_cidade")
-//    private String pbuRecupCidade;
     @Basic(optional = false)
     @NotNull
     @Column(name = "pbu_urgente")
     private short pbuUrgente;
     @Basic(optional = false)
     @NotNull
-//    @Column(name = "pbu_recusado")
-//    private short pbuRecusado;
-//    @Basic(optional = false)
-//    @NotNull
-//    @Column(name = "pbu_aprovado")
-//    private short pbuAprovado;
-//    @Basic(optional = false)
-//    @NotNull
-//    @Column(name = "pbu_aprovadoms")
-//    private short pbuAprovadoms;
     @JoinColumn(name = "pbu_id", referencedColumnName = "pbu_id", insertable = false, updatable = false)
     @OneToOne(optional = false)
     private Analise analise;
-//    @JoinColumn(name = "loc_nu_recup", referencedColumnName = "loc_nu")
-//    @ManyToOne
-//    private CepLocalidade locNuRecup;
     @JoinColumn(name = "pbs_id_pre", referencedColumnName = "pbs_id")
     @ManyToOne
     private Pedbusit pbsIdPre;

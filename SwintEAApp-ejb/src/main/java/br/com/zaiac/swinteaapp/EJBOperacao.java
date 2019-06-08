@@ -321,12 +321,12 @@ public class EJBOperacao implements EJBOperacaoRemote {
         if (vwPedbusPagoRecebido.getPbsId() == 3) {
             if (vwPedbusPagoRecebido.getLcbId() != null) {
                 logger.log(Level.SEVERE, "Operacao nao permitida para PB ja recebido/recuperado: {0} / {1}", new Object[]{checkpointParaVoltar.getPbuId().getPbuId(), checkpointParaVoltar.getPckId()});
-                throw new Exception("Operacao nao permitida para PB ja recebido: "+ vwPedbusPagoRecebido + "/" + checkpointParaVoltar.getPbuId().getPbuId());
+                throw new Exception("Operacao nao permitida para PB ja recebido: "+ vwPedbusPagoRecebido.getPbuId() + "/" + checkpointParaVoltar.getPckId());
             }
             
             if (vwPedbusPagoRecebido.getLopId()!= null) {
                 logger.log(Level.SEVERE, "Operacao nao permitida para PB ja pago: {0} / {1}", new Object[]{checkpointParaVoltar.getPbuId().getPbuId(), checkpointParaVoltar.getPckId()});
-                throw new Exception("Operacao nao permitida para PB ja pago: "+ vwPedbusPagoRecebido + "/" + checkpointParaVoltar.getPbuId().getPbuId());
+                throw new Exception("Operacao nao permitida para PB ja pago: "+ vwPedbusPagoRecebido.getPbuId() + "/" + checkpointParaVoltar.getPckId());
             }
         }
         
@@ -337,7 +337,7 @@ public class EJBOperacao implements EJBOperacaoRemote {
 
         if (vwPedbusPagoRecebido.getPbsId() == 1) {
             logger.log(Level.SEVERE, "Operacao nao permitida para PB em campo: {0} / {1}", new Object[]{checkpointParaVoltar.getPbuId().getPbuId(), checkpointParaVoltar.getPckId()});
-            throw new Exception("Operacao nao permitida para PB em campo: "+ vwPedbusPagoRecebido.getPbuId());
+            throw new Exception("Operacao nao permitida para PB em campo: "+ vwPedbusPagoRecebido.getPbuId()+ "/" + checkpointParaVoltar.getPckId());
         }
 
         Agente agente = agenteJpa.findByPbuIdAgsIdAtivo(checkpointParaVoltar.getAgeId().getPbuId());

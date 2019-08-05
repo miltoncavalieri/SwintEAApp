@@ -3,6 +3,7 @@ package br.com.zaiac.swinteaapp.entities;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -25,6 +26,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "CepLocalidade.findByLocNu", query = "SELECT c FROM CepLocalidade c WHERE c.locNu = :locNu")
 })
 public class CepLocalidade implements Serializable {
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "locNu")
+    private List<Locrecuploc> locrecuplocList;
 
     @OneToMany(mappedBy = "locNuRecup")
     private List<Checkpoint> checkpointList;
@@ -211,6 +215,15 @@ public class CepLocalidade implements Serializable {
 
     public void setCheckpointList(List<Checkpoint> checkpointList) {
         this.checkpointList = checkpointList;
+    }
+
+    @XmlTransient
+    public List<Locrecuploc> getLocrecuplocList() {
+        return locrecuplocList;
+    }
+
+    public void setLocrecuplocList(List<Locrecuploc> locrecuplocList) {
+        this.locrecuplocList = locrecuplocList;
     }
     
 }

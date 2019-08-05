@@ -26,6 +26,9 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Equipe implements Serializable {
 
     @OneToMany(mappedBy = "euiId")
+    private List<Analise> analiseList;
+
+    @OneToMany(mappedBy = "euiId")
     private List<Checkpoint> checkpointList;
 
     private static final long serialVersionUID = 1L;
@@ -110,6 +113,15 @@ public class Equipe implements Serializable {
 
     public void setCheckpointList(List<Checkpoint> checkpointList) {
         this.checkpointList = checkpointList;
+    }
+
+    @XmlTransient
+    public List<Analise> getAnaliseList() {
+        return analiseList;
+    }
+
+    public void setAnaliseList(List<Analise> analiseList) {
+        this.analiseList = analiseList;
     }
     
 }

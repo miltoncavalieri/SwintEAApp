@@ -10,6 +10,7 @@ import br.com.zaiac.swinteaapp.entities.Clientecobranca;
 import br.com.zaiac.swinteaapp.entities.Comissao;
 import br.com.zaiac.swinteaapp.entities.Pagamento;
 import br.com.zaiac.swinteaapp.entities.Pedbus;
+import br.com.zaiac.swinteaapp.entities.Pedbusrel;
 import br.com.zaiac.swinteaapp.entities.Recebimento;
 import br.com.zaiac.swinteaapp.entities.Tipopag;
 import br.com.zaiac.swinteaapp.entities.Usuario;
@@ -24,6 +25,8 @@ import br.com.zaiac.swinteaapp.facade.ClienteFacade;
 import br.com.zaiac.swinteaapp.facade.ClientecobrancaFacade;
 import br.com.zaiac.swinteaapp.facade.ComissaoFacade;
 import br.com.zaiac.swinteaapp.facade.EstadoFacade;
+import br.com.zaiac.swinteaapp.facade.LocrecupFacade;
+import br.com.zaiac.swinteaapp.facade.LocrecuplocFacade;
 import br.com.zaiac.swinteaapp.facade.OperacaoFacade;
 import br.com.zaiac.swinteaapp.facade.PagamentoFacade;
 import br.com.zaiac.swinteaapp.facade.PbsubstatusFacade;
@@ -42,11 +45,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,10 +61,26 @@ import static javax.ejb.TransactionAttributeType.MANDATORY;
 import javax.ejb.TransactionManagement;
 import static javax.ejb.TransactionManagementType.CONTAINER;
 import javax.imageio.ImageIO;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import javax.sql.DataSource;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.SystemException;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 
 @Stateless
 
@@ -932,7 +953,10 @@ public class EJBOperacao implements EJBOperacaoRemote {
                                             Long pPbuId,
                                             String pBatchOperacao,
                                             String pExtFilename,
-                                            String pPckImagem) throws Exception {
+                                            String pPckImagem,
+                                            Integer pLprId,
+                                            Integer pLrlId,
+                                            Boolean pGerarRelatorio) throws Exception {
 /*
 Operação: INSERT
           UPDATE 
@@ -956,7 +980,11 @@ Operação: INSERT
         PbsubstatusFacade pbsubstatusJpa = new PbsubstatusFacade();
         CepLocalidadeFacade cepLocalidadeJpa = new CepLocalidadeFacade();
         EstadoFacade estadoJpa = new EstadoFacade();
-        VwPagrecInvestigadoFacade vwPagrecInvestigadoJpa = new VwPagrecInvestigadoFacade();   
+        VwPagrecInvestigadoFacade vwPagrecInvestigadoJpa = new VwPagrecInvestigadoFacade(); 
+        LocrecupFacade locrecupJpa = new LocrecupFacade();
+        LocrecuplocFacade locrecuplocJpa = new LocrecuplocFacade();
+        PedbusrelFacade pedbusrelJpa = new PedbusrelFacade();
+        
         
         Pedbus pedbus = null;
         Analise analise = null;
@@ -981,6 +1009,10 @@ Operação: INSERT
         cepLocalidadeJpa.setEm(em);
         estadoJpa.setEm(em);
         vwPagrecInvestigadoJpa.setEm(em);
+        locrecupJpa.setEm(em);
+        locrecuplocJpa.setEm(em);
+        pedbusrelJpa.setEm(em);
+        
         
         analise = analiseJpa.findByPbuId(pPbuId);
         if (pFasId == 2) {
@@ -1054,17 +1086,27 @@ Operação: INSERT
             
         } else if (Operacao.equals("INSERT")) {
             checkpoint = new Checkpoint();
+            Usuario usuarioLogin = usuarioJpa.findByUsuId(pUsuIdLogin);
             checkpoint.setPckDt(dtsys);
             checkpoint.setEuiId((pedbus == null) ? null : pedbus.getEuiId());
-            checkpoint.setUsuIdCkp(usuarioJpa.findByUsuId(pUsuIdLogin));
+            checkpoint.setUsuIdCkp(usuarioLogin);
             checkpoint.setPckRelatorio((short)0);
             checkpoint.setCktId(ckptipoJpa.findByCktId(pCkpId));
             checkpoint.setPbuId(analise);
             checkpoint.setPckAtivo((short) 1);
             checkpoint.setPckDescricao(pPckDescricao);
+            if (usuarioLogin.getUsuCoordenador() == 1) {
+                checkpoint.setPckDescrCoord(pPckDescricao);
+            }
             checkpoint.setPckLegendaFoto(pPckLegendaFoto);
             checkpoint.setAgeId(agenteAtivo);
             checkpoint.setFasId(pedbusfaseJpa.findByFasId(pFasId));
+            
+            
+            
+            
+            
+            
             checkpointJpa.create(checkpoint);
             
             if (!(pPckImagem == null)) {
@@ -1127,6 +1169,10 @@ Operação: INSERT
         checkpoint.setLocNuRecup(cepLocalidade);
         checkpoint.setPckRecupCidade(cepLocalidade.getLocNo());
         checkpoint.setEstIdRecup(estadoJpa.findByEstId(pEstIdRecup));
+        
+        if (!(pLprId == null)) {            
+            checkpoint.setLocrecuploc(locrecuplocJpa.findByLrpIdLrlId(pLprId, pLrlId));
+        }
         checkpoint.setPckAprovado((short)0);
         checkpoint.setPckRecusado((short)0);
         checkpoint.setPckAprovadoms((short)0);
@@ -1196,11 +1242,16 @@ Operação: INSERT
                 recebimento.setRcbValor(clientecobranca.getClbVlrInvestigacao());
             } else if (pCkpId == 4) {
                 recebimento.setRcbValor(clientecobranca.getClbVlrRecuperacao());
-            }
-            if (analise.getAnaRastreado() == 1) {
-                if (analise.getAnaRastreadorRemovido() == 0) {
-                    tipopag = tipopagJpa.findByTppId(Short.parseShort("3"));
-                    recebimento.setRcbValor(clientecobranca.getClbVlrRastreado());
+                if (analise.getAnaRastreado() == 1) {
+                    if (analise.getAnaRastreadorRemovido() == 0) {
+                        tipopag = tipopagJpa.findByTppId(Short.parseShort("3"));
+                        recebimento.setRcbValor(clientecobranca.getClbVlrRastreado());
+                        recebimento.setTppId(tipopag);
+                    }
+                }
+                if (analise.getSitId().getSitId() == 2) {
+                    tipopag = tipopagJpa.findByTppId(Short.parseShort("4"));
+                    recebimento.setRcbValor(clientecobranca.getClbVlrFurtoroubo());
                     recebimento.setTppId(tipopag);
                 }
             }
@@ -1226,6 +1277,8 @@ Operação: INSERT
                 break;
         }
         
+        Boolean isSaveMudancaStatus = false;
+        
         if (!(pedbus.getPbsIdPre() == null)) {
             if (pedbus.getPbsId().getPbsId().equals(pedbus.getPbsIdPre().getPbsId())) {
                 aprovarMudancaStatus(pedbus.getPbuId(), checkpoint.getPckId(), pUsuIdLogin , "AUTO");
@@ -1233,9 +1286,31 @@ Operação: INSERT
                 checkpoint.setPckDtPre(pedbus.getPbuDtPre());                
                 pedbus.setPbsIdPre(null);
                 pedbus.setPbuDtPre(null);
+                isSaveMudancaStatus = true;
             }
         }
-        pedbusJpa.edit(pedbus);        
+        pedbusJpa.edit(pedbus);     
+        
+        
+        System.out.println("Checkpoint????? : " + checkpoint.getPckId());
+        
+        
+        
+        if (pGerarRelatorio) {
+            if (!isSaveMudancaStatus) {
+                aprovarMudancaStatus(pedbus.getPbuId(), checkpoint.getPckId(), pUsuIdLogin , "AUTO");
+            }
+            
+            Pedbusrel pedbusrel = new Pedbusrel();
+            pedbusrel.setPckId(checkpoint.getPckId());
+            pedbusrel.setCheckpoint(checkpoint);
+            pedbusrelJpa.create(pedbusrel);            
+            this.pbGerarRelatorio(checkpoint.getPckId(), pUsuIdLogin, pEstIdRecup, pLocNuRecup);            
+            
+            this.pbAprovarRelatorio(checkpoint.getPckId(), pUsuIdLogin);
+            this.gerarRelatorioCliente(checkpoint.getPckId());
+        }
+        
         return checkpoint.getPckId();
     }    
 
@@ -1275,6 +1350,56 @@ Operação: INSERT
         }
         checkpointJpa.deleteBatch(pPckId);
     }    
+    
+    
+    
+    @Override
+    public void gerarRelatorioCliente (Long pPckId) throws Exception {
+        CheckpointFacade checkpointJpa  = new CheckpointFacade();
+        checkpointJpa.setEm(em);
+        
+        Checkpoint checkpoint;
+        
+        checkpoint = checkpointJpa.findByPckId(pPckId);
+        String caminhoOrigem = "/webserver/reports/jasper/";
+        
+        String dir = FormatValues.diretorioPb(checkpoint.getPbuId().getPbuId(), checkpoint.getPbuId().getAnaDt(), "relatorio");
+        FileMgmt.createDirectoryStructure(dir);
+//        System.out.println (dir);
+        
+        String caminhoRelatorio = dir;
+        String arquivoJasper = "relatorio.jasper";
+        File arquivoGerado = null;
+        HashMap mapa = new HashMap();
+        
+        mapa.clear();
+        mapa.put("pbuId",Integer.parseUnsignedInt(checkpoint.getPbuId().getPbuId().toString()));
+        mapa.put("pckId",Integer.parseUnsignedInt(checkpoint.getPckId().toString()));
+                
+        try {
+            arquivoGerado = new java.io.File(caminhoRelatorio + checkpoint.getPckId() + ".pdf");
+            if (arquivoGerado.exists()) {
+                arquivoGerado.delete();
+            }
+            
+            Context initContext = new InitialContext();
+            Context envContext  = (Context)initContext.lookup("java:jboss");
+            DataSource ds = (DataSource)envContext.lookup("datasources/SwintDS");
+            Connection conn = ds.getConnection();
+                    
+            JasperReport jasperReport = (JasperReport) JRLoader.loadObjectFromFile(caminhoOrigem + arquivoJasper);
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, mapa, conn);
+            JRPdfExporter jrPdfExporter = new JRPdfExporter();
+            jrPdfExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+            jrPdfExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(arquivoGerado));
+            jrPdfExporter.exportReport();
+            conn.close();
+        } catch (JRException e) {
+            e.printStackTrace();
+        }
+        
+        
+    }
     
     
     

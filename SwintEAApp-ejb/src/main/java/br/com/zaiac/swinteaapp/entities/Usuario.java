@@ -32,6 +32,15 @@ import javax.xml.bind.annotation.XmlTransient;
 })
 public class Usuario implements Serializable {
 
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "usu_api")
+    private short usuApi;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "usu_limitar_acesso")
+    private short usuLimitarAcesso;
+
     @OneToMany(mappedBy = "usuIdAprovador")
     private List<Recibo> reciboList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "usuIdSolicitante")
@@ -501,6 +510,22 @@ public class Usuario implements Serializable {
 
     public void setReciboList1(List<Recibo> reciboList1) {
         this.reciboList1 = reciboList1;
+    }
+
+    public short getUsuApi() {
+        return usuApi;
+    }
+
+    public void setUsuApi(short usuApi) {
+        this.usuApi = usuApi;
+    }
+
+    public short getUsuLimitarAcesso() {
+        return usuLimitarAcesso;
+    }
+
+    public void setUsuLimitarAcesso(short usuLimitarAcesso) {
+        this.usuLimitarAcesso = usuLimitarAcesso;
     }
     
 }

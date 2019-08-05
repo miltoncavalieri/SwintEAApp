@@ -29,6 +29,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 })
 public class Clientecobranca implements Serializable {
 
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "clb_vlr_furtoroubo")
+    private BigDecimal clbVlrFurtoroubo;
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected ClientecobrancaPK clientecobrancaPK;
@@ -129,6 +134,14 @@ public class Clientecobranca implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.Clientecobranca[ clientecobrancaPK=" + clientecobrancaPK + " ]";
+    }
+
+    public BigDecimal getClbVlrFurtoroubo() {
+        return clbVlrFurtoroubo;
+    }
+
+    public void setClbVlrFurtoroubo(BigDecimal clbVlrFurtoroubo) {
+        this.clbVlrFurtoroubo = clbVlrFurtoroubo;
     }
     
 }

@@ -33,6 +33,11 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Sla.findAll", query = "SELECT s FROM Sla s")})
 public class Sla implements Serializable {
 
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "sla_dias_analise")
+    private short slaDiasAnalise;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -142,6 +147,14 @@ public class Sla implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.Sla[ slaId=" + slaId + " ]";
+    }
+
+    public short getSlaDiasAnalise() {
+        return slaDiasAnalise;
+    }
+
+    public void setSlaDiasAnalise(short slaDiasAnalise) {
+        this.slaDiasAnalise = slaDiasAnalise;
     }
     
 }

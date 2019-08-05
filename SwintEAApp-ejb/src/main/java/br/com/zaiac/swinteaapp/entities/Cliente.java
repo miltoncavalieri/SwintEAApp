@@ -32,6 +32,17 @@ import javax.xml.bind.annotation.XmlTransient;
 })
 public class Cliente implements Serializable {
 
+    @OneToMany(mappedBy = "cliIdFranquia")
+    private List<Cliente> clienteList;
+    @JoinColumn(name = "cli_id_franquia", referencedColumnName = "cli_id")
+    @ManyToOne
+    private Cliente cliIdFranquia;
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "cli_vcnh_mostra_erro")
+    private short cliVcnhMostraErro;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "cliente")
     private List<Clientecobranca> clientecobrancaList;
 
@@ -234,6 +245,31 @@ public class Cliente implements Serializable {
 
     public void setClientecobrancaList(List<Clientecobranca> clientecobrancaList) {
         this.clientecobrancaList = clientecobrancaList;
+    }
+
+    public short getCliVcnhMostraErro() {
+        return cliVcnhMostraErro;
+    }
+
+    public void setCliVcnhMostraErro(short cliVcnhMostraErro) {
+        this.cliVcnhMostraErro = cliVcnhMostraErro;
+    }
+
+    @XmlTransient
+    public List<Cliente> getClienteList() {
+        return clienteList;
+    }
+
+    public void setClienteList(List<Cliente> clienteList) {
+        this.clienteList = clienteList;
+    }
+
+    public Cliente getCliIdFranquia() {
+        return cliIdFranquia;
+    }
+
+    public void setCliIdFranquia(Cliente cliIdFranquia) {
+        this.cliIdFranquia = cliIdFranquia;
     }
     
 }

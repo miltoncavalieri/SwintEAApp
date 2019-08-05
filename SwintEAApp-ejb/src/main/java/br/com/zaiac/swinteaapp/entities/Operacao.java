@@ -123,4 +123,5 @@ public class Operacao implements Serializable {
     public void setCheckpointList(List<Checkpoint> checkpointList) {
         this.checkpointList = checkpointList;
     }
+
 }

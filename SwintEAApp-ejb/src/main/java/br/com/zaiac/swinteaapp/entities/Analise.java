@@ -35,6 +35,13 @@ import javax.xml.bind.annotation.XmlTransient;
 })
 public class Analise implements Serializable {
 
+    @JoinColumn(name = "eui_id", referencedColumnName = "eui_id")
+    @ManyToOne
+    private Equipe euiId;
+    @JoinColumn(name = "drt_id", referencedColumnName = "drt_id")
+    @ManyToOne
+    private Dadosimport drtId;
+
     @Basic(optional = false)
     @NotNull
     @Column(name = "ana_dt_receb")
@@ -509,6 +516,22 @@ public class Analise implements Serializable {
 
     public void setAnaDtReceb(Date anaDtReceb) {
         this.anaDtReceb = anaDtReceb;
+    }
+
+    public Equipe getEuiId() {
+        return euiId;
+    }
+
+    public void setEuiId(Equipe euiId) {
+        this.euiId = euiId;
+    }
+
+    public Dadosimport getDrtId() {
+        return drtId;
+    }
+
+    public void setDrtId(Dadosimport drtId) {
+        this.drtId = drtId;
     }
     
 }

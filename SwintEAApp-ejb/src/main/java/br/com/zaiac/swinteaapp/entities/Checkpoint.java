@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -101,6 +102,19 @@ import javax.xml.bind.annotation.XmlTransient;
         
 })
 public class Checkpoint implements Serializable {
+
+    @Lob
+    @Size(max = 65535)
+    @Column(name = "pck_descr_coord")
+    private String pckDescrCoord;
+    @JoinColumn(name = "mop_id", referencedColumnName = "mop_id")
+    @ManyToOne
+    private Motivopadrao mopId;
+    @JoinColumns({
+        @JoinColumn(name = "lrp_id", referencedColumnName = "lrp_id"),
+        @JoinColumn(name = "lrl_id", referencedColumnName = "lrl_id")})
+    @ManyToOne
+    private Locrecuploc locrecuploc;
 
     @Column(name = "pck_dt_pre")
     @Temporal(TemporalType.DATE)
@@ -534,6 +548,30 @@ public class Checkpoint implements Serializable {
 
     public void setPbsIdPre(Pedbusit pbsIdPre) {
         this.pbsIdPre = pbsIdPre;
+    }
+
+    public String getPckDescrCoord() {
+        return pckDescrCoord;
+    }
+
+    public void setPckDescrCoord(String pckDescrCoord) {
+        this.pckDescrCoord = pckDescrCoord;
+    }
+
+    public Motivopadrao getMopId() {
+        return mopId;
+    }
+
+    public void setMopId(Motivopadrao mopId) {
+        this.mopId = mopId;
+    }
+
+    public Locrecuploc getLocrecuploc() {
+        return locrecuploc;
+    }
+
+    public void setLocrecuploc(Locrecuploc locrecuploc) {
+        this.locrecuploc = locrecuploc;
     }
     
 }

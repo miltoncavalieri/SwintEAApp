@@ -141,6 +141,10 @@ public class EJBFaturamento implements EJBFaturamentoRemote {
                         recebimento.setRcbValor(clientecobranca.getClbVlrRastreado());
                         recebimentoJpa.edit(recebimento);                        
                         break;
+                    case 4:
+                        recebimento.setRcbValor(clientecobranca.getClbVlrFurtoroubo());
+                        recebimentoJpa.edit(recebimento);                        
+                        break;
                 }
                 
             } catch (NoResultException e) {

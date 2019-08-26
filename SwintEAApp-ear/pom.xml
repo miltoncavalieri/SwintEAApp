@@ -4,12 +4,12 @@
     <parent>
     <artifactId>SwintEAApp</artifactId>
     <groupId>br.com.zaiac</groupId>
-    <version>1.9</version>
+    <version>1.10</version>
   </parent>
 
     <groupId>br.com.zaiac</groupId>
     <artifactId>SwintEAApp-ear</artifactId>
-    <version>1.9</version>
+    <version>1.10.0</version>
     <packaging>ear</packaging>
 
     <name>SwintEAApp-ear</name>
@@ -25,8 +25,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <source>1.9</source>
-                    <target>1.9</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -44,7 +44,7 @@
         <dependency>
             <groupId>br.com.zaiac</groupId>
             <artifactId>SwintEAApp-ejb</artifactId>
-            <version>1.9</version>
+            <version>1.10.0</version>
             <type>ejb</type>
         </dependency>
     </dependencies>

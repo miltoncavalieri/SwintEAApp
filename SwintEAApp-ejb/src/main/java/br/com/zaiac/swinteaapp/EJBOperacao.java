@@ -1102,11 +1102,6 @@ Operação: INSERT
             checkpoint.setAgeId(agenteAtivo);
             checkpoint.setFasId(pedbusfaseJpa.findByFasId(pFasId));
             
-            
-            
-            
-            
-            
             checkpointJpa.create(checkpoint);
             
             if (!(pPckImagem == null)) {
@@ -1124,6 +1119,9 @@ Operação: INSERT
                 }
             } else {
                 checkpoint.setPckRelatorio((short) 0);
+                if (usuarioLogin.getUsuCoordenador() == 1) {
+                    checkpoint.setPckRelatorio((short)1);
+                }
             }
             checkpointJpa.edit(checkpoint);
         }

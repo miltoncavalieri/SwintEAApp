@@ -11,6 +11,7 @@ import br.com.zaiac.swinteaapp.facade.PedbusFacade;
 import br.com.zaiac.swinteaapp.facade.AnalisedocFacade;
 import br.com.zaiac.swinteaapp.facade.DbparamFacade;
 import br.com.zaiac.swinteaapp.facade.PedbusitFacade;
+import br.com.zaiac.swinteaapp.facade.SysparamFacade;
 
 import br.com.zaiac.swinteaapp.facade.VwPbemailtoccFacade;
 import br.com.zaiac.swinteaapp.facade.VwPedbusEnvioFacade;
@@ -94,7 +95,7 @@ public class EJBScheduler implements Serializable {
 //    @Schedule(dayOfWeek = "*", hour = "*", minute = "*/2", year="*", persistent = false)    
     public void enviaEmailAgente() 
             throws Exception, NamingException, NoClassDefFoundError {
-        logger.log(Level.INFO, "Checking for Send-Email to Agente Versão 1.9");
+        logger.log(Level.INFO, "Checking for Send-Email to Agente Versão 1.10.0");
         
         if (isRunningEnviaEmailAgente) {
             logger.log(Level.INFO, "-----> Already running");
@@ -109,6 +110,7 @@ public class EJBScheduler implements Serializable {
         AnaliseFacade analiseJpa = new AnaliseFacade();
         PedbusitFacade pedbusitJpa = new PedbusitFacade();
         DbparamFacade dbparamJpa = new DbparamFacade();
+        SysparamFacade sysparamJpa = new SysparamFacade();
         
         pedbusJpa.setEm(em);
         vwPedbusEnvioJpa.setEm(em);
@@ -117,6 +119,7 @@ public class EJBScheduler implements Serializable {
         analiseJpa.setEm(em);
         pedbusitJpa.setEm(em);
         dbparamJpa.setEm(em);
+        sysparamJpa.setEm(em);
         
         List<VwPedbusEnvio> vwPedbusEnvios;
         Pedbus pedbus;
@@ -130,9 +133,16 @@ public class EJBScheduler implements Serializable {
         HashMap mapa = new HashMap();
         
         
-        String caminhoOrigem = "/webserver/reports/jasper/";
-        String caminhoRelatorio = "/webserver/reports/pdf/";
-        String caminhoAnaliseDoc = "/webserver/images/analisedoc/";
+        
+//        String caminhoOrigem = "/webserver/reports/jasper/";
+//        String caminhoRelatorio = "/webserver/reports/pdf/";
+//        String caminhoAnaliseDoc = "/webserver/images/analisedoc/";
+
+        String caminhoOrigem = sysparamJpa.findByPrmNome("JASPER_DIR");
+        String caminhoRelatorio = sysparamJpa.findByPrmNome("PDF_CLIENTE_DIR");
+        String caminhoAnaliseDoc = sysparamJpa.findByPrmNome("IMAGE_ANALISEDOC");
+
+
         String arquivoJasper = "pb.jasper";
         File arquivoGerado = null;
         String linhaHTML;
@@ -154,8 +164,6 @@ public class EJBScheduler implements Serializable {
             
             msg.setFrom(dbparam.getParEmailOrigem());
 
-            
-            
             for (VwPedbusEnvio pb : vwPedbusEnvios) {
                 tx.begin();
                 
@@ -272,10 +280,12 @@ public class EJBScheduler implements Serializable {
                 (e instanceof HeuristicRollbackException)
                 ) {  
                 isRunningEnviaEmailAgente = false;
+                conn.close();
                 throw new Exception(e);
             } else {
                 tx.rollback();
                 isRunningEnviaEmailAgente = false;
+                conn.close();
                 throw new Exception (e);
             }            
         }

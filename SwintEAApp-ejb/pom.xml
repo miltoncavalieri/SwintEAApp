@@ -4,12 +4,12 @@
     <parent>
     <artifactId>SwintEAApp</artifactId>
     <groupId>br.com.zaiac</groupId>
-    <version>1.9</version>
+    <version>1.10.0</version>
   </parent>
 
     <groupId>br.com.zaiac</groupId>
     <artifactId>SwintEAApp-ejb</artifactId>
-    <version>1.9</version>
+    <version>1.10.0</version>
     <packaging>ejb</packaging>
 
     <name>SwintEAApp-ejb</name>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>br.com.zaiac</groupId>
             <artifactId>EJBRemoteInterface</artifactId>
-            <version>1.0</version>
+            <version>1.10.0</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

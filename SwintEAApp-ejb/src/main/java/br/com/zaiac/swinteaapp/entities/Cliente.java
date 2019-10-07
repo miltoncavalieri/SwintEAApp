@@ -32,6 +32,9 @@ import javax.xml.bind.annotation.XmlTransient;
 })
 public class Cliente implements Serializable {
 
+    @OneToMany(mappedBy = "cliId")
+    private List<Loteimport> loteimportList;
+
     @OneToMany(mappedBy = "cliIdFranquia")
     private List<Cliente> clienteList;
     @JoinColumn(name = "cli_id_franquia", referencedColumnName = "cli_id")
@@ -270,6 +273,15 @@ public class Cliente implements Serializable {
 
     public void setCliIdFranquia(Cliente cliIdFranquia) {
         this.cliIdFranquia = cliIdFranquia;
+    }
+
+    @XmlTransient
+    public List<Loteimport> getLoteimportList() {
+        return loteimportList;
+    }
+
+    public void setLoteimportList(List<Loteimport> loteimportList) {
+        this.loteimportList = loteimportList;
     }
     
 }

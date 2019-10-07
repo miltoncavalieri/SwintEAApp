@@ -35,6 +35,10 @@ import javax.xml.bind.annotation.XmlTransient;
 })
 public class Analise implements Serializable {
 
+    @JoinColumn(name = "ana_veiculo_placa", referencedColumnName = "vei_placa")
+    @ManyToOne(optional = false)
+    private Veiculo anaVeiculoPlaca;
+
     @JoinColumn(name = "eui_id", referencedColumnName = "eui_id")
     @ManyToOne
     private Equipe euiId;
@@ -87,11 +91,11 @@ public class Analise implements Serializable {
     @Size(max = 50)
     @Column(name = "ana_cidade_devolucao")
     private String anaCidadeDevolucao;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 7)
-    @Column(name = "ana_veiculo_placa")
-    private String anaVeiculoPlaca;
+//    @Basic(optional = false)
+//    @NotNull
+//    @Size(min = 1, max = 7)
+//    @Column(name = "ana_veiculo_placa")
+//    private String anaVeiculoPlaca;
     @Size(max = 11)
     @Column(name = "ana_veiculo_renavam")
     private String anaVeiculoRenavam;
@@ -180,11 +184,11 @@ public class Analise implements Serializable {
         this.pbuId = pbuId;
     }
 
-    public Analise(Long pbuId, Date anaDt, short anaBo, String anaVeiculoPlaca, short anaLocatario, short anaCondutores, short anaEndloca, short anaTelloca, short anaRastreado, short anaRastreadorRemovido, short anaPriloc) {
+    public Analise(Long pbuId, Date anaDt, short anaBo, short anaLocatario, short anaCondutores, short anaEndloca, short anaTelloca, short anaRastreado, short anaRastreadorRemovido, short anaPriloc) {
         this.pbuId = pbuId;
         this.anaDt = anaDt;
         this.anaBo = anaBo;
-        this.anaVeiculoPlaca = anaVeiculoPlaca;
+//        this.anaVeiculoPlaca = anaVeiculoPlaca;
         this.anaLocatario = anaLocatario;
         this.anaCondutores = anaCondutores;
         this.anaEndloca = anaEndloca;
@@ -250,13 +254,13 @@ public class Analise implements Serializable {
         this.anaCidadeDevolucao = anaCidadeDevolucao;
     }
 
-    public String getAnaVeiculoPlaca() {
-        return anaVeiculoPlaca;
-    }
+//    public String getAnaVeiculoPlaca() {
+//        return anaVeiculoPlaca;
+//    }
 
-    public void setAnaVeiculoPlaca(String anaVeiculoPlaca) {
-        this.anaVeiculoPlaca = anaVeiculoPlaca;
-    }
+//    public void setAnaVeiculoPlaca(String anaVeiculoPlaca) {
+//        this.anaVeiculoPlaca = anaVeiculoPlaca;
+//    }
 
     public String getAnaVeiculoRenavam() {
         return anaVeiculoRenavam;
@@ -532,6 +536,14 @@ public class Analise implements Serializable {
 
     public void setDrtId(Dadosimport drtId) {
         this.drtId = drtId;
+    }
+
+    public Veiculo getAnaVeiculoPlaca() {
+        return anaVeiculoPlaca;
+    }
+
+    public void setAnaVeiculoPlaca(Veiculo anaVeiculoPlaca) {
+        this.anaVeiculoPlaca = anaVeiculoPlaca;
     }
     
 }

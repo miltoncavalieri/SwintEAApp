@@ -31,6 +31,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Cor.findAll", query = "SELECT c FROM Cor c")})
 public class Cor implements Serializable {
 
+    @OneToMany(mappedBy = "corId")
+    private List<Veiculo> veiculoList;
+
     @JoinColumn(name = "cto_id", referencedColumnName = "cto_id")
     @ManyToOne(optional = false)
     private Cortodas ctoId;
@@ -127,6 +130,15 @@ public class Cor implements Serializable {
 
     public void setCtoId(Cortodas ctoId) {
         this.ctoId = ctoId;
+    }
+
+    @XmlTransient
+    public List<Veiculo> getVeiculoList() {
+        return veiculoList;
+    }
+
+    public void setVeiculoList(List<Veiculo> veiculoList) {
+        this.veiculoList = veiculoList;
     }
     
 }

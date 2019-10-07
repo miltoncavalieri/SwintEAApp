@@ -35,6 +35,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Modelo.findAll", query = "SELECT m FROM Modelo m")})
 public class Modelo implements Serializable {
 
+    @OneToMany(mappedBy = "modId")
+    private List<Veiculo> veiculoList;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -119,6 +122,15 @@ public class Modelo implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.Modelo[ modId=" + modId + " ]";
+    }
+
+    @XmlTransient
+    public List<Veiculo> getVeiculoList() {
+        return veiculoList;
+    }
+
+    public void setVeiculoList(List<Veiculo> veiculoList) {
+        this.veiculoList = veiculoList;
     }
     
 }

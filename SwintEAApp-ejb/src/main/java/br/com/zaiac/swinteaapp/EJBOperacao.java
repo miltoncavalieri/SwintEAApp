@@ -68,11 +68,11 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.sql.DataSource;
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.NotSupportedException;
-import javax.transaction.RollbackException;
-import javax.transaction.SystemException;
+//import javax.transaction.HeuristicMixedException;
+//import javax.transaction.HeuristicRollbackException;
+//import javax.transaction.NotSupportedException;
+//import javax.transaction.RollbackException;
+//import javax.transaction.SystemException;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -1288,11 +1288,6 @@ Operação: INSERT
             }
         }
         pedbusJpa.edit(pedbus);     
-        
-        
-        System.out.println("Checkpoint????? : " + checkpoint.getPckId());
-        
-        
         
         if (pGerarRelatorio) {
             if (!isSaveMudancaStatus) {

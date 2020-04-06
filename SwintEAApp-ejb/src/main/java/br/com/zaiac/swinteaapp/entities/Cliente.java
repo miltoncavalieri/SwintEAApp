@@ -33,6 +33,15 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Cliente implements Serializable {
 
     @OneToMany(mappedBy = "cliId")
+    private List<Cor> corList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "cliId")
+    private List<Clicasolote> clicasoloteList;
+    @OneToMany(mappedBy = "cliId")
+    private List<Modelo> modeloList;
+    @OneToMany(mappedBy = "cliId")
+    private List<Fabricante> fabricanteList;
+
+    @OneToMany(mappedBy = "cliId")
     private List<Loteimport> loteimportList;
 
     @OneToMany(mappedBy = "cliIdFranquia")
@@ -282,6 +291,42 @@ public class Cliente implements Serializable {
 
     public void setLoteimportList(List<Loteimport> loteimportList) {
         this.loteimportList = loteimportList;
+    }
+
+    @XmlTransient
+    public List<Cor> getCorList() {
+        return corList;
+    }
+
+    public void setCorList(List<Cor> corList) {
+        this.corList = corList;
+    }
+
+    @XmlTransient
+    public List<Clicasolote> getClicasoloteList() {
+        return clicasoloteList;
+    }
+
+    public void setClicasoloteList(List<Clicasolote> clicasoloteList) {
+        this.clicasoloteList = clicasoloteList;
+    }
+
+    @XmlTransient
+    public List<Modelo> getModeloList() {
+        return modeloList;
+    }
+
+    public void setModeloList(List<Modelo> modeloList) {
+        this.modeloList = modeloList;
+    }
+
+    @XmlTransient
+    public List<Fabricante> getFabricanteList() {
+        return fabricanteList;
+    }
+
+    public void setFabricanteList(List<Fabricante> fabricanteList) {
+        this.fabricanteList = fabricanteList;
     }
     
 }

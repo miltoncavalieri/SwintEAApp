@@ -10,22 +10,22 @@ import javax.persistence.Query;
 
 public class AgenteFacade extends AbstractFacade<Agente>{
     private EntityManager em;
-    public EntityManager getEm() {
-        return em;
-    }
+//    public EntityManager getEm() {
+//        return em;
+//    }
 
-    public void setEm(EntityManager em) {
-        this.em = em;
-    }
+//    public void setEm(EntityManager em) {
+//        this.em = em;
+//    }
 
     public AgenteFacade() {
         super(Agente.class);
     }
 
-    @Override
-    protected EntityManager getEntityManager() {
-        return em;
-    }
+//    @Override
+//    protected EntityManager getEntityManager() {
+//        return em;
+//    }
     
     
     public Integer updateByAgeIdSetPckIdNull(Long ageId) {
@@ -63,4 +63,11 @@ public class AgenteFacade extends AbstractFacade<Agente>{
             return false;
         }
     }
+    
+    public Agente findByAgeId (Long ageId) {
+        Query query = getEm().createNamedQuery("Agente.findByAgeId");
+        query.setParameter("ageId", ageId);
+        return (Agente) query.getSingleResult();
+    }
+    
 }

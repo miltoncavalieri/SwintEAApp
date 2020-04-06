@@ -23,6 +23,18 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Analisedoc.findByPbuId", query = "SELECT a FROM Analisedoc a WHERE a.pbuId = :pbuId")})
 public class Analisedoc implements Serializable {
 
+    @Size(max = 255)
+    @Column(name = "and_diretorio")
+    private String andDiretorio;
+    @Column(name = "and_face_disponivel")
+    private Short andFaceDisponivel;
+    @Size(max = 25)
+    @Column(name = "and_face_probabilidade")
+    private String andFaceProbabilidade;
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+    @Column(name = "and_face_similaridade")
+    private Double andFaceSimilaridade;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -133,6 +145,38 @@ public class Analisedoc implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.Analisedoc[ andId=" + andId + " ]";
+    }
+
+    public String getAndDiretorio() {
+        return andDiretorio;
+    }
+
+    public void setAndDiretorio(String andDiretorio) {
+        this.andDiretorio = andDiretorio;
+    }
+
+    public Short getAndFaceDisponivel() {
+        return andFaceDisponivel;
+    }
+
+    public void setAndFaceDisponivel(Short andFaceDisponivel) {
+        this.andFaceDisponivel = andFaceDisponivel;
+    }
+
+    public String getAndFaceProbabilidade() {
+        return andFaceProbabilidade;
+    }
+
+    public void setAndFaceProbabilidade(String andFaceProbabilidade) {
+        this.andFaceProbabilidade = andFaceProbabilidade;
+    }
+
+    public Double getAndFaceSimilaridade() {
+        return andFaceSimilaridade;
+    }
+
+    public void setAndFaceSimilaridade(Double andFaceSimilaridade) {
+        this.andFaceSimilaridade = andFaceSimilaridade;
     }
     
 }

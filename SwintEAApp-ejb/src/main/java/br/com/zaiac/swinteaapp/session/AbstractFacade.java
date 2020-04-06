@@ -2,6 +2,8 @@ package br.com.zaiac.swinteaapp.session;
 
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 
 public abstract class AbstractFacade<T> {
     private final Class<T> entityClass;
@@ -9,8 +11,24 @@ public abstract class AbstractFacade<T> {
     public AbstractFacade(Class<T> entityClass) {
         this.entityClass = entityClass;
     }
+    
+    @PersistenceContext(unitName = "SwintService", type=PersistenceContextType.EXTENDED)
+    private EntityManager em;
+    
+    
+    public EntityManager getEm() {
+        return em;
+    }
+    public void setEm(EntityManager em) {
+        this.em = em;
+    }
 
-    protected abstract EntityManager getEntityManager();
+    protected EntityManager getEntityManager() {
+        return em;
+    }
+    
+
+//    protected abstract EntityManager getEntityManager();
 
     public void create(T entity) {
         getEntityManager().persist(entity);
@@ -20,7 +38,7 @@ public abstract class AbstractFacade<T> {
         getEntityManager().merge(entity);
     }
 
-public void remove(T entity) {        
+    public void remove(T entity) {        
         getEntityManager().remove(getEntityManager().merge(entity));  
     }
 

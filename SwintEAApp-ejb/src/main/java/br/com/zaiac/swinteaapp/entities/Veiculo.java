@@ -37,6 +37,13 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Veiculo.findAll", query = "SELECT v FROM Veiculo v")})
 public class Veiculo implements Serializable {
 
+    @Size(max = 60)
+    @Column(name = "vei_proprietario")
+    private String veiProprietario;
+    @JoinColumn(name = "loc_nu", referencedColumnName = "loc_nu")
+    @ManyToOne
+    private CepLocalidade locNu;
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -138,6 +145,22 @@ public class Veiculo implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.facade.Veiculo[ veiPlaca=" + veiPlaca + " ]";
+    }
+
+    public String getVeiProprietario() {
+        return veiProprietario;
+    }
+
+    public void setVeiProprietario(String veiProprietario) {
+        this.veiProprietario = veiProprietario;
+    }
+
+    public CepLocalidade getLocNu() {
+        return locNu;
+    }
+
+    public void setLocNu(CepLocalidade locNu) {
+        this.locNu = locNu;
     }
     
 }

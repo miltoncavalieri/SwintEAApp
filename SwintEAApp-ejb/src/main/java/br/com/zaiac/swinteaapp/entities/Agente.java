@@ -33,6 +33,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Agente.updateByAgeIdSetPckIdNull", query = "UPDATE Agente a SET a.pckId = null WHERE a.ageId = :ageId"),
     @NamedQuery(name = "Agente.deleteByAgeId", query = "DELETE FROM Agente a WHERE a.ageId = :ageId"),
     @NamedQuery(name = "Agente.findAgenteAtivo", query = "SELECT COUNT(1) FROM Agente a WHERE a.pbuId = :pbuId and a.usuId = :usuId and ags_id in (2,3)"),
+    @NamedQuery(name = "Agente.findByAgeId", query = "SELECT a FROM Agente a WHERE a.ageId = :ageId")
 
 })
 public class Agente implements Serializable {

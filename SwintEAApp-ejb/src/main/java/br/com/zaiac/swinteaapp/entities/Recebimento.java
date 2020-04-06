@@ -20,6 +20,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -38,6 +39,16 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Recebimento.updateLcbIdToNull", query = "UPDATE Recebimento r SET r.lcbId = NULL WHERE r.lcbId = :lcbId"),
 })
 public class Recebimento implements Serializable {
+
+    @JoinColumn(name = "tpp_id_apurado", referencedColumnName = "tpp_id")
+    @ManyToOne
+    private Tipopag tppIdApurado;
+
+    @Size(max = 35)
+    @Column(name = "rcb_descricao")
+    private String rcbDescricao;
+    @Column(name = "rcb_valor_apurado")
+    private BigDecimal rcbValorApurado;
 
     @JoinColumn(name = "rcb_id_invest", referencedColumnName = "rcb_id")
     @ManyToOne
@@ -206,6 +217,30 @@ public class Recebimento implements Serializable {
 
     public void setRcbIdInvest(Recebimento rcbIdInvest) {
         this.rcbIdInvest = rcbIdInvest;
+    }
+
+    public String getRcbDescricao() {
+        return rcbDescricao;
+    }
+
+    public void setRcbDescricao(String rcbDescricao) {
+        this.rcbDescricao = rcbDescricao;
+    }
+
+    public BigDecimal getRcbValorApurado() {
+        return rcbValorApurado;
+    }
+
+    public void setRcbValorApurado(BigDecimal rcbValorApurado) {
+        this.rcbValorApurado = rcbValorApurado;
+    }
+
+    public Tipopag getTppIdApurado() {
+        return tppIdApurado;
+    }
+
+    public void setTppIdApurado(Tipopag tppIdApurado) {
+        this.tppIdApurado = tppIdApurado;
     }
     
 }

@@ -23,11 +23,28 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Clientecobranca.findByCliId", query = "SELECT c FROM Clientecobranca c WHERE c.clientecobrancaPK.cliId = :cliId"),
     @NamedQuery(name = "Clientecobranca.deleteByCliIdClbDt", query = "DELETE FROM Clientecobranca c WHERE c.clientecobrancaPK = :clientecobrancaPK"),
     @NamedQuery(name = "Clientecobranca.findByCliIdClbDt", 
-            query = "SELECT c FROM Clientecobranca c WHERE c.clientecobrancaPK.cliId = :cliId AND c.clientecobrancaPK.clbDt = (SELECT MAX(c1.clientecobrancaPK.clbDt) FROM Clientecobranca c1 WHERE c1.clientecobrancaPK.cliId = c.clientecobrancaPK.cliId)"),
+            query = "SELECT c FROM Clientecobranca c WHERE c.clientecobrancaPK.cliId = :cliId AND c.clientecobrancaPK.clbDt < :clbDt ORDER BY c.clientecobrancaPK.clbDt DESC)"),
     @NamedQuery(name = "Clientecobranca.findVlrCobrancaCliente", 
             query = "SELECT c FROM Clientecobranca c WHERE c.clientecobrancaPK.cliId = :cliId AND c.clientecobrancaPK.clbDt = (SELECT MAX(c1.clientecobrancaPK.clbDt) FROM Clientecobranca c1 WHERE (c1.clientecobrancaPK.cliId = :cliId) AND (c1.clientecobrancaPK.clbDt <= :rcbDt))"),
 })
 public class Clientecobranca implements Serializable {
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "clb_vlr_patio")
+    private BigDecimal clbVlrPatio;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "clb_vlr_delegacia")
+    private BigDecimal clbVlrDelegacia;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "clb_vlr_patio_rastreado")
+    private BigDecimal clbVlrPatioRastreado;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "clb_vlr_delegacia_rastreado")
+    private BigDecimal clbVlrDelegaciaRastreado;
 
     @Basic(optional = false)
     @NotNull
@@ -142,6 +159,38 @@ public class Clientecobranca implements Serializable {
 
     public void setClbVlrFurtoroubo(BigDecimal clbVlrFurtoroubo) {
         this.clbVlrFurtoroubo = clbVlrFurtoroubo;
+    }
+
+    public BigDecimal getClbVlrPatio() {
+        return clbVlrPatio;
+    }
+
+    public void setClbVlrPatio(BigDecimal clbVlrPatio) {
+        this.clbVlrPatio = clbVlrPatio;
+    }
+
+    public BigDecimal getClbVlrDelegacia() {
+        return clbVlrDelegacia;
+    }
+
+    public void setClbVlrDelegacia(BigDecimal clbVlrDelegacia) {
+        this.clbVlrDelegacia = clbVlrDelegacia;
+    }
+
+    public BigDecimal getClbVlrPatioRastreado() {
+        return clbVlrPatioRastreado;
+    }
+
+    public void setClbVlrPatioRastreado(BigDecimal clbVlrPatioRastreado) {
+        this.clbVlrPatioRastreado = clbVlrPatioRastreado;
+    }
+
+    public BigDecimal getClbVlrDelegaciaRastreado() {
+        return clbVlrDelegaciaRastreado;
+    }
+
+    public void setClbVlrDelegaciaRastreado(BigDecimal clbVlrDelegaciaRastreado) {
+        this.clbVlrDelegaciaRastreado = clbVlrDelegaciaRastreado;
     }
     
 }

@@ -28,6 +28,32 @@ import javax.xml.bind.annotation.XmlTransient;
 
 public class Comissao implements Serializable {
 
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "com_roubofurto")
+    private BigDecimal comRoubofurto;
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "com_rastreado")
+    private BigDecimal comRastreado;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "com_patio")
+    private BigDecimal comPatio;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "com_delegacia")
+    private BigDecimal comDelegacia;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "com_patio_rastreado")
+    private BigDecimal comPatioRastreado;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "com_delegacia_rastreado")
+    private BigDecimal comDelegaciaRastreado;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -141,6 +167,54 @@ public class Comissao implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.Comissao[ comId=" + comId + " ]";
+    }
+
+    public BigDecimal getComRastreado() {
+        return comRastreado;
+    }
+
+    public void setComRastreado(BigDecimal comRastreado) {
+        this.comRastreado = comRastreado;
+    }
+
+    public BigDecimal getComPatio() {
+        return comPatio;
+    }
+
+    public void setComPatio(BigDecimal comPatio) {
+        this.comPatio = comPatio;
+    }
+
+    public BigDecimal getComDelegacia() {
+        return comDelegacia;
+    }
+
+    public void setComDelegacia(BigDecimal comDelegacia) {
+        this.comDelegacia = comDelegacia;
+    }
+
+    public BigDecimal getComPatioRastreado() {
+        return comPatioRastreado;
+    }
+
+    public void setComPatioRastreado(BigDecimal comPatioRastreado) {
+        this.comPatioRastreado = comPatioRastreado;
+    }
+
+    public BigDecimal getComDelegaciaRastreado() {
+        return comDelegaciaRastreado;
+    }
+
+    public void setComDelegaciaRastreado(BigDecimal comDelegaciaRastreado) {
+        this.comDelegaciaRastreado = comDelegaciaRastreado;
+    }
+
+    public BigDecimal getComRoubofurto() {
+        return comRoubofurto;
+    }
+
+    public void setComRoubofurto(BigDecimal comRoubofurto) {
+        this.comRoubofurto = comRoubofurto;
     }
     
 }

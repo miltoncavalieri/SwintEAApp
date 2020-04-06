@@ -14,6 +14,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -33,6 +35,10 @@ import javax.xml.bind.annotation.XmlTransient;
 @NamedQueries({
     @NamedQuery(name = "Fabricante.findAll", query = "SELECT f FROM Fabricante f")})
 public class Fabricante implements Serializable {
+
+    @JoinColumn(name = "cli_id", referencedColumnName = "cli_id")
+    @ManyToOne
+    private Cliente cliId;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -107,6 +113,14 @@ public class Fabricante implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.Fabricante[ fabId=" + fabId + " ]";
+    }
+
+    public Cliente getCliId() {
+        return cliId;
+    }
+
+    public void setCliId(Cliente cliId) {
+        this.cliId = cliId;
     }
     
 }

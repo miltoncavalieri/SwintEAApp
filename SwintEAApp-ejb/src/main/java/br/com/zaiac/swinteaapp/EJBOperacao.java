@@ -5,9 +5,18 @@ import br.com.zaiac.swinteaapp.entities.Analise;
 import br.com.zaiac.swinteaapp.entities.CepLocalidade;
 import br.com.zaiac.swinteaapp.entities.Checkpoint;
 import br.com.zaiac.swinteaapp.entities.Ckpleitura;
+import br.com.zaiac.swinteaapp.entities.Clicaso;
+import br.com.zaiac.swinteaapp.entities.Clicasocheckpoint;
+import br.com.zaiac.swinteaapp.entities.ClicasocheckpointPK;
+import br.com.zaiac.swinteaapp.entities.Clicasofase;
+import br.com.zaiac.swinteaapp.entities.Clicasolote;
+import br.com.zaiac.swinteaapp.facade.ClicasoloteFacade;
+import br.com.zaiac.swinteaapp.entities.Clicasotipolote;
 import br.com.zaiac.swinteaapp.entities.Cliente;
 import br.com.zaiac.swinteaapp.entities.Clientecobranca;
 import br.com.zaiac.swinteaapp.entities.Comissao;
+import br.com.zaiac.swinteaapp.entities.Locrecup;
+import br.com.zaiac.swinteaapp.entities.Locrecuploc;
 import br.com.zaiac.swinteaapp.entities.Pagamento;
 import br.com.zaiac.swinteaapp.entities.Pedbus;
 import br.com.zaiac.swinteaapp.entities.Pedbusrel;
@@ -21,6 +30,9 @@ import br.com.zaiac.swinteaapp.facade.CepLocalidadeFacade;
 import br.com.zaiac.swinteaapp.facade.CheckpointFacade;
 import br.com.zaiac.swinteaapp.facade.CkpleituraFacade;
 import br.com.zaiac.swinteaapp.facade.CkptipoFacade;
+import br.com.zaiac.swinteaapp.facade.ClicasoFacade;
+import br.com.zaiac.swinteaapp.facade.ClicasocheckpointFacade;
+import br.com.zaiac.swinteaapp.facade.ClicasotipoloteFacade;
 import br.com.zaiac.swinteaapp.facade.ClienteFacade;
 import br.com.zaiac.swinteaapp.facade.ClientecobrancaFacade;
 import br.com.zaiac.swinteaapp.facade.ComissaoFacade;
@@ -39,8 +51,16 @@ import br.com.zaiac.swinteaapp.facade.TipopagFacade;
 import br.com.zaiac.swinteaapp.facade.UsuarioFacade;
 import br.com.zaiac.swinteaapp.facade.VwPagrecInvestigadoFacade;
 import br.com.zaiac.swinteaapp.facade.VwPedbusPagoRecebidoFacade;
+import br.com.zaiac.swinteaapp.facade.ClicasofaseFacade;
+import br.com.zaiac.swinteaapp.facade.ClicasovalidacaoFacade;
+import br.com.zaiac.swinteaapp.facade.ClicasovalidacaoanexoFacade;
+import br.com.zaiac.swinteaapp.facade.VwClicasoAnteriorFaturarFacade;
+import br.com.zaiac.swinteaapp.facade.VwClicasoFaturarConcluido;
+import br.com.zaiac.swinteaapp.facade.VwClicasoFaturarConcluidoFacade;
+import br.com.zaiac.swinteaapp.views.VwClicasoAnteriorFaturar;
 import br.com.zaiac.swinteaapp.views.VwPagrecInvestigado;
 import br.com.zaiac.swinteaapp.views.VwPedbusPagoRecebido;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
@@ -289,6 +309,8 @@ public class EJBOperacao implements EJBOperacaoRemote {
     
     
 */    
+    
+    //TODO: Voltar para Campo Ajuste no caso de ter 
     @Override
     public void voltarPbParaCampo(Long pPckId, Integer pUsuId) throws Exception {
         VwPedbusPagoRecebidoFacade vwPedbusPagoRecebidoJpa = new VwPedbusPagoRecebidoFacade();
@@ -304,6 +326,11 @@ public class EJBOperacao implements EJBOperacaoRemote {
         AgenteFacade agenteJpa = new AgenteFacade();
         PedbusrelFacade pedbusrelJpa = new PedbusrelFacade();
         
+        VwClicasoFaturarConcluidoFacade vwClicasoFaturarConcluidoJpa = new VwClicasoFaturarConcluidoFacade();
+        
+        
+        
+        
         vwPedbusPagoRecebidoJpa.setEm(em);
         pagamentoJpa.setEm(em);
         recebimentoJpa.setEm(em);        
@@ -315,6 +342,9 @@ public class EJBOperacao implements EJBOperacaoRemote {
         pedbusJpa.setEm(em);
         agenteJpa.setEm(em);
         pedbusrelJpa.setEm(em);
+        vwClicasoFaturarConcluidoJpa.setEm(em);
+
+        
         
         VwPedbusPagoRecebido vwPedbusPagoRecebido;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
@@ -334,6 +364,16 @@ public class EJBOperacao implements EJBOperacaoRemote {
             logger.log(Level.INFO, "Operacao nao encontrada PCK: {0}", checkpointParaVoltar.getPbuId().getPbuId());
             throw new Exception("Operacao nao encontrada PCK: " + checkpointParaVoltar.getPbuId().getPbuId());
         }
+        VwClicasoFaturarConcluido vwClicasoFaturarConcluido;
+
+        
+        try {
+            if (!(analise.getA04IdCaso() == null)) {
+                vwClicasoFaturarConcluido = vwClicasoFaturarConcluidoJpa.findByA04IdCasoCliId(analise.getA04IdCaso().getA04IdCaso(), analise.getCliId().getCliId());
+                logger.log(Level.INFO, "Operacao nao permitida para PB de Integracao com Situacao Faturar/Concluido: {0}", checkpointParaVoltar.getPbuId().getPbuId());
+                throw new Exception("Operacao nao permitida para PB de Integracao com Situacao Faturar/Concluido: " + checkpointParaVoltar.getPbuId().getPbuId());
+            }
+        } catch (NoResultException e) {}
         
 //
 //        Se for Recuperado nao permitir voltar para campo
@@ -433,7 +473,39 @@ public class EJBOperacao implements EJBOperacaoRemote {
         checkpoint.setEuiId(checkpoint.getPbuId().getPedbus().getEuiId());        
         checkpointJpa.create(checkpoint);
         pedbusJpa.updatePbParaCampo(vwPedbusPagoRecebido.getPbuId());
+        
+        if (analise.getA04IdCaso() != null) {
+            removerCasoCliente(analise);
+        }
         logger.log(Level.INFO, "Operacao permitida para PB: {0} / {1} - Volta para CAMPO", new Object[]{vwPedbusPagoRecebido.getPbuId(), pPckId});
+//        throw new Exception("Fiz o Rollback");
+    }
+    
+    
+    
+    
+    public void removerCasoCliente(Analise analise) {
+        VwClicasoAnteriorFaturarFacade vwClicasoAnteriorFaturarJpa = new VwClicasoAnteriorFaturarFacade();
+        ClicasovalidacaoFacade clicasovalidacaoJpa = new ClicasovalidacaoFacade();
+        ClicasovalidacaoanexoFacade clicasovalidacaoanexoJpa = new ClicasovalidacaoanexoFacade();
+
+        ClicasoFacade clicasoJpa = new ClicasoFacade();
+        ClicasocheckpointFacade clicasocheckpointJpa = new ClicasocheckpointFacade();
+        
+        vwClicasoAnteriorFaturarJpa.setEm(em);
+        clicasovalidacaoJpa.setEm(em);
+        clicasovalidacaoanexoJpa.setEm(em);        
+        clicasoJpa.setEm(em);
+        clicasocheckpointJpa.setEm(em);
+        
+        
+        VwClicasoAnteriorFaturar vwClicasoAnteriorFaturar;
+        vwClicasoAnteriorFaturar = vwClicasoAnteriorFaturarJpa.findByA04IdCasoCliId(analise.getA04IdCaso().getA04IdCaso(), analise.getCliId().getCliId());
+        
+        clicasovalidacaoanexoJpa.deleteByA04IdCaso(vwClicasoAnteriorFaturar.getA04IdCaso());
+        clicasovalidacaoJpa.deleteByA04IdCaso(vwClicasoAnteriorFaturar.getA04IdCaso());
+        clicasocheckpointJpa.deleteByA04IdCaso(vwClicasoAnteriorFaturar.getA04IdCaso());
+        clicasoJpa.deleteByA04IdCaso(vwClicasoAnteriorFaturar.getA04IdCaso());
     }
 
 /*
@@ -906,6 +978,7 @@ public class EJBOperacao implements EJBOperacaoRemote {
             }
             pagamento.setPagDtPrevisao(null);
             pagamento.setPagValor(comissao.getComInvestigacao());
+            pagamento.setPagValorApurado(pagamento.getPagValor());
             pagamento.setTppId(tipopagJpa.findByTppId((short)2));
             pagamento.setPagAtivo((short) 1);
             pagamentoJpa.create(pagamento);
@@ -985,9 +1058,16 @@ Operação: INSERT
         LocrecuplocFacade locrecuplocJpa = new LocrecuplocFacade();
         PedbusrelFacade pedbusrelJpa = new PedbusrelFacade();
         
+        ClicasoloteFacade clicasoloteJpa = new ClicasoloteFacade();
+        ClicasotipoloteFacade clicasotipoloteJpa = new ClicasotipoloteFacade();
+        ClicasofaseFacade clicasofaseJpa = new ClicasofaseFacade();
+        ClicasoFacade clicasoJpa = new ClicasoFacade();
+        ClicasocheckpointFacade clicasocheckpointJpa = new ClicasocheckpointFacade();
+        
+        
         
         Pedbus pedbus = null;
-        Analise analise = null;
+        Analise analise;
         Agente agenteAtivo = null;
         
         checkpointJpa.setEm(em);
@@ -1014,15 +1094,20 @@ Operação: INSERT
         pedbusrelJpa.setEm(em);
         
         
-        analise = analiseJpa.findByPbuId(pPbuId);
-        if (pFasId == 2) {
-            pedbus = pedbusJpa.findByPbuId(pPbuId);
-            agenteAtivo = agenteJpa.findByPbuIdAgsIdAtivo(pedbus);
-        }
-        try {
-
+        clicasoloteJpa.setEm(em);
+        clicasotipoloteJpa.setEm(em);
+        clicasofaseJpa.setEm(em);
+        clicasoJpa.setEm(em);
+        clicasocheckpointJpa.setEm(em);
+        
+        try {        
+            analise = analiseJpa.findByPbuId(pPbuId);
+            if (pFasId == 2) {
+                pedbus = pedbusJpa.findByPbuId(pPbuId);
+                agenteAtivo = agenteJpa.findByPbuIdAgsIdAtivo(pedbus);
+            }
         } catch (NoResultException e) {
-            
+            throw new NoResultException("Analise/Pedido de busca nao encontrada para PB " + pPbuId);
         }
         
         Checkpoint checkpoint = null;
@@ -1039,7 +1124,7 @@ Operação: INSERT
         } catch (NullPointerException e) {
             pBatchOperacao = "N";
         }
-        if (!(pedbus ==null)) {
+        if (!(pedbus == null)) {
             if (pedbus.getOpeId() == null) {
                 throw new Exception("Insercao em Batch para Operacao a Operação deverá ser definida no Pedido de Busca");
             }
@@ -1167,10 +1252,19 @@ Operação: INSERT
         checkpoint.setLocNuRecup(cepLocalidade);
         checkpoint.setPckRecupCidade(cepLocalidade.getLocNo());
         checkpoint.setEstIdRecup(estadoJpa.findByEstId(pEstIdRecup));
+
+        Locrecup locrecup = null;
+        Locrecuploc locrecuploc;
         
-        if (!(pLprId == null)) {            
-            checkpoint.setLocrecuploc(locrecuplocJpa.findByLrpIdLrlId(pLprId, pLrlId));
+        
+        if (!(pLprId == null)) {
+            locrecup = locrecupJpa.findLrpId(pLprId);
+            locrecuploc = locrecuplocJpa.findByLrpIdLrlId(pLprId, pLrlId);
+            if (!(locrecuploc == null)) {            
+                checkpoint.setLocrecuploc(locrecuploc);
+            }
         }
+        
         checkpoint.setPckAprovado((short)0);
         checkpoint.setPckRecusado((short)0);
         checkpoint.setPckAprovadoms((short)0);
@@ -1180,15 +1274,38 @@ Operação: INSERT
             agenteAtivo.setPckId(checkpoint);
             agenteJpa.edit(agenteAtivo);
         }
-        
-               
-        
+
         Tipopag tipopag = null;
         
         if (pCkpId == 3) {
             tipopag = tipopagJpa.findByTppId(Short.parseShort("2"));
         } else if (pCkpId == 4) {
-            tipopag = tipopagJpa.findByTppId(Short.parseShort("1"));
+            if (!(locrecup == null)) {
+                if ((analise.getAnaRastreado() == 1) && (analise.getAnaRastreadorRemovido() == 0)) {                    
+                    if (locrecup.getLrpPatio() == 1) {
+                        tipopag = tipopagJpa.findByTppId((short)7);
+                    } else if (locrecup.getLrpDelegacia() == 1) {
+                        tipopag = tipopagJpa.findByTppId((short)8);
+                    } else {
+                        tipopag = tipopagJpa.findByTppId((short)3);
+                    }
+                } else {
+                    if (locrecup.getLrpPatio() == 1) {
+                        tipopag = tipopagJpa.findByTppId((short)5);
+                    } else if (locrecup.getLrpDelegacia() == 1) {
+                        tipopag = tipopagJpa.findByTppId((short)6);
+                    } else {
+                        tipopag = tipopagJpa.findByTppId((short)3);
+                    }
+                }
+            } else {
+                if ((analise.getAnaRastreado() == 1) && (analise.getAnaRastreadorRemovido() == 0)) {                    
+                    tipopag = tipopagJpa.findByTppId((short)3);
+                } else {
+                    tipopag = tipopagJpa.findByTppId((short)1);
+                }
+            }
+            
         }
         
         List<VwPagrecInvestigado> vwPagrecInvestigado = vwPagrecInvestigadoJpa.findByPbuId(pPbuId);
@@ -1216,10 +1333,14 @@ Operação: INSERT
         }
         if (pCkpId == 3) {
             pagamento.setPagValor(comissao.getComInvestigacao());
+            pagamento.setPagValorApurado(pagamento.getPagValor());
         } else if (pCkpId == 4) {
             pagamento.setPagValor(comissao.getComRecuperacao());
+            pagamento.setPagValorApurado(pagamento.getPagValor());
         }
         pagamento.setTppId(tipopag);
+        pagamento.setTppIdApurado(tipopag);
+        
         pagamento.setPagAtivo((short)1);
         pagamentoJpa.create(pagamento);
                 
@@ -1231,26 +1352,35 @@ Operação: INSERT
         recebimento.setRcbRelatorio((short) 0);
         recebimento.setPckId(checkpoint);           
         recebimento.setTppId(tipopag);
+        recebimento.setTppIdApurado(tipopag);
+        
         if (!(rcbIdInvest == null)) {
             recebimento.setRcbIdInvest(recebimentoJpa.findByRcbId(rcbIdInvest));
         }
         try {
-            Clientecobranca clientecobranca = clientecobrancaJpa.findByCliIdClbDt(cliente);                
+            Clientecobranca clientecobranca = clientecobrancaJpa.findByCliIdClbDt(cliente, recebimento.getRcbDt());                
             if (pCkpId == 3) {
                 recebimento.setRcbValor(clientecobranca.getClbVlrInvestigacao());
+                recebimento.setRcbValorApurado(recebimento.getRcbValor());
             } else if (pCkpId == 4) {
                 recebimento.setRcbValor(clientecobranca.getClbVlrRecuperacao());
+                recebimento.setRcbValorApurado(recebimento.getRcbValor());
                 if (analise.getAnaRastreado() == 1) {
                     if (analise.getAnaRastreadorRemovido() == 0) {
                         tipopag = tipopagJpa.findByTppId(Short.parseShort("3"));
                         recebimento.setRcbValor(clientecobranca.getClbVlrRastreado());
+                        recebimento.setRcbValorApurado(recebimento.getRcbValor());
                         recebimento.setTppId(tipopag);
+                        recebimento.setTppIdApurado(tipopag);
+                        
                     }
                 }
                 if (analise.getSitId().getSitId() == 2) {
                     tipopag = tipopagJpa.findByTppId(Short.parseShort("4"));
                     recebimento.setRcbValor(clientecobranca.getClbVlrFurtoroubo());
+                    recebimento.setRcbValorApurado(recebimento.getRcbValor());
                     recebimento.setTppId(tipopag);
+                    recebimento.setTppIdApurado(tipopag);
                 }
             }
         } catch (NoResultException e) {
@@ -1258,9 +1388,12 @@ Operação: INSERT
                 if (analise.getAnaRastreadorRemovido() == 0) {
                     tipopag = tipopagJpa.findByTppId(Short.parseShort("3"));
                     recebimento.setTppId(tipopag);
+                    recebimento.setTppIdApurado(tipopag);
+                    
                 }
             }
             recebimento.setRcbValor(BigDecimal.valueOf(0));
+            recebimento.setRcbValorApurado(recebimento.getRcbValor());
         }
         recebimentoJpa.create(recebimento);
 
@@ -1304,13 +1437,62 @@ Operação: INSERT
             this.gerarRelatorioCliente(checkpoint.getPckId());
         }
         
+        if (!(analise.getA04IdCaso() == null)) {
+            Clicasolote clicasolote;
+            Clicasotipolote clicasotipolote;
+            Clicasofase clicasofase;
+            Clicaso clicaso;
+            Clicaso clicasoAnalise;
+            Clicasocheckpoint clicasocheckpoint;
+            ClicasocheckpointPK clicasocheckpointPK;
+            try {
+                clicasotipolote = clicasotipoloteJpa.findByA01Id((short)4);
+                clicasofase = clicasofaseJpa.findByA01IdA02Id((short)4, (short)1);
+                try {
+                    clicasolote = clicasoloteJpa.findLoteAberto(cliente, clicasotipolote);
+                } catch (NoResultException e) {
+                    clicasolote = new Clicasolote();
+                    clicasolote.setA01Id(clicasotipolote);
+                    clicasolote.setCliId(cliente);
+                    clicasolote.setA03Dt(new Date(System.currentTimeMillis()));
+                    clicasolote.setA03Concluido("false");
+                    clicasoloteJpa.create(clicasolote);
+                }
+                clicasoAnalise = clicasoJpa.findByA04IdCaso(analise.getA04IdCaso().getA04IdCaso());
+                clicaso = new Clicaso();
+                
+                clicaso.setA03Id(clicasolote);
+                clicaso.setA04IdCasoCliente(clicasoAnalise.getA04IdCasoCliente());
+                clicasoJpa.create(clicaso);
+                clicasocheckpoint = new Clicasocheckpoint();
+                clicasocheckpointPK = new ClicasocheckpointPK();
+                clicasocheckpointPK.setA04IdCaso(clicaso.getA04IdCaso());
+                clicasocheckpointPK.setA05Seq(clicasocheckpointJpa.findMaxA05Seq(clicaso.getA04IdCaso()));             
+                clicasocheckpoint.setClicasocheckpointPK(clicasocheckpointPK);
+                clicasocheckpoint.setA05Dt(new Date(System.currentTimeMillis()));
+                clicasocheckpoint.setClicasofase(clicasofase);
+                clicasocheckpointJpa.create(clicasocheckpoint);
+                
+                clicaso.setA05SeqUltimoStatus(clicasocheckpoint.getClicasocheckpointPK().getA05Seq());
+                clicasoJpa.edit(clicaso);
+            } catch (NoResultException e) {
+                throw new NoResultException(e.toString());
+            }
+            
+        }
         return checkpoint.getPckId();
-    }    
-
+    }
+    
     public String diretorioPb (Long pbuId, Date pbuDt, String subdir) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         return "/webserver/pb/" + dateFormat.format(pbuDt) + "/" + pbuId + "/" + subdir + "/";
     }
+    
+    
+    
+    
+    
+    
     
     
     @Override

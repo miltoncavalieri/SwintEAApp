@@ -57,38 +57,33 @@ public class EJBFaturamento implements EJBFaturamentoRemote {
         UsuarioFacade usuarioJpa = new UsuarioFacade();
         PagamentoFacade pagamentoJpa = new PagamentoFacade();
         
-        
-        
         lotepgtoJpa.setEm(em);
         comissaoJpa.setEm(em);
         usuarioJpa.setEm(em);
         pagamentoJpa.setEm(em);
         
-        
         Lotepgto lotepgto;
         Usuario usuario;
-        Comissao comissao = null;
+        Comissao comissao;
         
         try {
             lotepgto = lotepgtoJpa.findByLopId(pLopId);
+            try {
+                usuario = usuarioJpa.findByUsuId(lotepgto.getUsuIdAgente().getUsuId());
+                if (Objects.isNull(usuario.getComId())) {
+                    comissao = comissaoJpa.findByComId(1);
+                } else {
+                    comissao = comissaoJpa.findByComId(usuario.getComId().getComId());                    
+                }
+                pagamentoJpa.updatePagValorLopId(lotepgto, comissao);
+            } catch (NoResultException e) {
+                e.printStackTrace();
+                throw new Exception("Usuario do Lote de pagamento (" + pLopId + ") não encontrado. (" + lotepgto.getUsuIdAgente().getUsuId() + ")");
+            }
+            
         } catch (NoResultException e) {
             throw new Exception("Lote de pagamento (" + pLopId + ") não encontrado.");
         }
-        
-        
-        try {
-            usuario = usuarioJpa.findByUsuId(lotepgto.getUsuIdAgente().getUsuId());
-            if (Objects.isNull(usuario.getComId())) {
-                comissao = comissaoJpa.findByComId(1);
-            } else {
-                comissao = comissaoJpa.findByComId(usuario.getComId().getComId());
-            }
-        } catch (Exception e) {
-            usuario = usuarioJpa.findByUsuId(lotepgto.getUsuIdAgente().getUsuId());
-        }
-        
-        pagamentoJpa.updatePagValorLopIdInvestigacao(lotepgto, comissao.getComInvestigacao());
-        pagamentoJpa.updatePagValorLopIdRecuperacao(lotepgto, comissao.getComRecuperacao());
     }
 
 /*
@@ -131,24 +126,49 @@ public class EJBFaturamento implements EJBFaturamentoRemote {
                 switch (recebimento.getTppId().getTppId()) {
                     case 1:
                         recebimento.setRcbValor(clientecobranca.getClbVlrRecuperacao());
+                        recebimento.setRcbValorApurado(clientecobranca.getClbVlrRecuperacao());
                         recebimentoJpa.edit(recebimento);
                         break;
                     case 2:
                         recebimento.setRcbValor(clientecobranca.getClbVlrInvestigacao());
+                        recebimento.setRcbValorApurado(clientecobranca.getClbVlrInvestigacao());
                         recebimentoJpa.edit(recebimento);                        
                         break;
                     case 3:
                         recebimento.setRcbValor(clientecobranca.getClbVlrRastreado());
+                        recebimento.setRcbValorApurado(clientecobranca.getClbVlrRastreado());
                         recebimentoJpa.edit(recebimento);                        
                         break;
                     case 4:
                         recebimento.setRcbValor(clientecobranca.getClbVlrFurtoroubo());
+                        recebimento.setRcbValorApurado(clientecobranca.getClbVlrFurtoroubo());
                         recebimentoJpa.edit(recebimento);                        
                         break;
+                    case 5:
+                        recebimento.setRcbValor(clientecobranca.getClbVlrPatio());
+                        recebimento.setRcbValorApurado(clientecobranca.getClbVlrPatio());
+                        recebimentoJpa.edit(recebimento);                        
+                        break;
+                    case 6:
+                        recebimento.setRcbValor(clientecobranca.getClbVlrDelegacia());
+                        recebimento.setRcbValorApurado(clientecobranca.getClbVlrDelegacia());
+                        recebimentoJpa.edit(recebimento);                        
+                        break;
+                    case 7:
+                        recebimento.setRcbValor(clientecobranca.getClbVlrPatioRastreado());
+                        recebimento.setRcbValorApurado(clientecobranca.getClbVlrPatioRastreado());
+                        recebimentoJpa.edit(recebimento);                        
+                        break;
+                    case 8:
+                        recebimento.setRcbValor(clientecobranca.getClbVlrDelegaciaRastreado());
+                        recebimento.setRcbValorApurado(clientecobranca.getClbVlrDelegaciaRastreado());
+                        recebimentoJpa.edit(recebimento);                        
+                        break;
+                    default:
+                        break;
                 }
-                
             } catch (NoResultException e) {
-                logger.log(Level.WARNING, "Lote: {1} Cliente: {2}. Nao foi localizado valor para recebimento");
+                logger.log(Level.SEVERE, "Lote: {1}. Cadastro de valores para cobranca nao foi localizado", new Object[]{pLcbId.toString()});
             }
         }
     }

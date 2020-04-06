@@ -13,6 +13,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -24,6 +25,15 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Locrecup.findAll", query = "SELECT l FROM Locrecup l"),
     @NamedQuery(name = "Locrecup.findLrpId", query = "SELECT l FROM Locrecup l WHERE l.lrpId = :lrpId" )})
 public class Locrecup implements Serializable {
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "lrp_patio")
+    private short lrpPatio;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "lrp_delegacia")
+    private short lrpDelegacia;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -92,6 +102,22 @@ public class Locrecup implements Serializable {
     @Override
     public String toString() {
         return "br.com.zaiac.swinteaapp.entities.Locrecup[ lrpId=" + lrpId + " ]";
+    }
+
+    public short getLrpPatio() {
+        return lrpPatio;
+    }
+
+    public void setLrpPatio(short lrpPatio) {
+        this.lrpPatio = lrpPatio;
+    }
+
+    public short getLrpDelegacia() {
+        return lrpDelegacia;
+    }
+
+    public void setLrpDelegacia(short lrpDelegacia) {
+        this.lrpDelegacia = lrpDelegacia;
     }
     
 }

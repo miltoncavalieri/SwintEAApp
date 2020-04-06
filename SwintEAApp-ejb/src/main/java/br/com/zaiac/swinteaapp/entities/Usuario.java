@@ -34,6 +34,14 @@ public class Usuario implements Serializable {
 
     @Basic(optional = false)
     @NotNull
+    @Column(name = "usu_regional")
+    private short usuRegional;
+    @JoinColumn(name = "usu_id_regional", referencedColumnName = "usu_id")
+    @ManyToOne
+    private Usuario usuIdRegional;
+
+    @Basic(optional = false)
+    @NotNull
     @Column(name = "usu_api")
     private short usuApi;
     @Basic(optional = false)
@@ -526,6 +534,22 @@ public class Usuario implements Serializable {
 
     public void setUsuLimitarAcesso(short usuLimitarAcesso) {
         this.usuLimitarAcesso = usuLimitarAcesso;
+    }
+
+    public short getUsuRegional() {
+        return usuRegional;
+    }
+
+    public void setUsuRegional(short usuRegional) {
+        this.usuRegional = usuRegional;
+    }
+
+    public Usuario getUsuIdRegional() {
+        return usuIdRegional;
+    }
+
+    public void setUsuIdRegional(Usuario usuIdRegional) {
+        this.usuIdRegional = usuIdRegional;
     }
     
 }

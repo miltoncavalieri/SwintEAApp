@@ -35,6 +35,10 @@ import javax.xml.bind.annotation.XmlTransient;
 })
 public class Analise implements Serializable {
 
+    @JoinColumn(name = "a04_id_caso", referencedColumnName = "a04_id_caso")
+    @ManyToOne
+    private Clicaso a04IdCaso;
+
     @JoinColumn(name = "ana_veiculo_placa", referencedColumnName = "vei_placa")
     @ManyToOne(optional = false)
     private Veiculo anaVeiculoPlaca;
@@ -544,6 +548,14 @@ public class Analise implements Serializable {
 
     public void setAnaVeiculoPlaca(Veiculo anaVeiculoPlaca) {
         this.anaVeiculoPlaca = anaVeiculoPlaca;
+    }
+
+    public Clicaso getA04IdCaso() {
+        return a04IdCaso;
+    }
+
+    public void setA04IdCaso(Clicaso a04IdCaso) {
+        this.a04IdCaso = a04IdCaso;
     }
     
 }

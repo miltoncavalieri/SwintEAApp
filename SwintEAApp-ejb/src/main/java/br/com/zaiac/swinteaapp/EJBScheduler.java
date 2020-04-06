@@ -89,13 +89,13 @@ public class EJBScheduler implements Serializable {
     
     @Resource(name = "java:jboss/mail/Swint")
     private Session session;
-//    @Schedule(dayOfWeek = "*", hour = "*", minute = "*/10", second = "0",year="*", persistent = false)    
+//    @Schedule(dayOfWeek = "*", hour = "*", minute = "*/10", second = "0",year="*", persistent = false)
     
     @Schedule(dayOfWeek = "*", hour = "*", minute = "*/5", year="*", persistent = false)
-//    @Schedule(dayOfWeek = "*", hour = "*", minute = "*/2", year="*", persistent = false)    
+//    @Schedule(dayOfWeek = "*", hour = "*", minute = "*/2", year="*", persistent = false)
     public void enviaEmailAgente() 
             throws Exception, NamingException, NoClassDefFoundError {
-        logger.log(Level.INFO, "Checking for Send-Email to Agente Versão 1.10.0");
+        logger.log(Level.INFO, "Checking for Send-Email to Agente Versão 8.2.0");
         
         if (isRunningEnviaEmailAgente) {
             logger.log(Level.INFO, "-----> Already running");
@@ -238,7 +238,7 @@ public class EJBScheduler implements Serializable {
                 for (Analisedoc analisedoc : analisedocs) {
                     if (analisedoc.getAndDocumento() != null) {
                         messageBodyPart = new MimeBodyPart();
-                        javax.activation.DataSource source = new FileDataSource(caminhoAnaliseDoc + analisedoc.getAndDocumento());
+                        javax.activation.DataSource source = new FileDataSource(analisedoc.getAndDiretorio() + analisedoc.getAndDocumento());
                         messageBodyPart.setDataHandler(new DataHandler(source));
                         messageBodyPart.setFileName(analisedoc.getDocId().getDocNome() + "_" + seqdoc + "." + fileNameExtension(analisedoc.getAndDocumento()));
                         multipart.addBodyPart(messageBodyPart);

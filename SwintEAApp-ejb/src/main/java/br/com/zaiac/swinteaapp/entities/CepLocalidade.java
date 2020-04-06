@@ -27,6 +27,9 @@ import javax.xml.bind.annotation.XmlTransient;
 })
 public class CepLocalidade implements Serializable {
 
+    @OneToMany(mappedBy = "locNu")
+    private List<Veiculo> veiculoList;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "locNu")
     private List<Locrecuploc> locrecuplocList;
 
@@ -224,6 +227,15 @@ public class CepLocalidade implements Serializable {
 
     public void setLocrecuplocList(List<Locrecuploc> locrecuplocList) {
         this.locrecuplocList = locrecuplocList;
+    }
+
+    @XmlTransient
+    public List<Veiculo> getVeiculoList() {
+        return veiculoList;
+    }
+
+    public void setVeiculoList(List<Veiculo> veiculoList) {
+        this.veiculoList = veiculoList;
     }
     
 }

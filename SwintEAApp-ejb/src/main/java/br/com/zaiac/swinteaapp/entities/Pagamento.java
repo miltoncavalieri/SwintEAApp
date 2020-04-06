@@ -20,6 +20,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -40,10 +41,24 @@ import javax.xml.bind.annotation.XmlTransient;
     
     @NamedQuery(name = "Pagamento.updatePagValorLopIdRecuperacao", query = "UPDATE Pagamento p SET p.pagValor =  :pagValor WHERE p.lopId = :lopId AND p.tppId = 1"),
     @NamedQuery(name = "Pagamento.updatePagValorLopIdInvestigacao", query = "UPDATE Pagamento p SET p.pagValor =  :pagValor WHERE p.lopId = :lopId AND p.tppId = 2"),
+    @NamedQuery(name = "Pagamento.findByLopId", query = "SELECT p FROM Pagamento p WHERE p.lopId = :lopId"),
+    @NamedQuery(name = "Pagamento.updatePagValorValorApuradoByPagId", query = "UPDATE Pagamento p SET p.pagValor = :pagValor, p.pagValorApurado = :pagValor WHERE p.pagId = :pagId"),
     
     @NamedQuery(name = "Pagamento.findPagEventual", query = "SELECT p FROM Pagamento p JOIN p.ageId a WHERE a.pbuId IS NULL AND p.lopId = :lopId"),
 })
 public class Pagamento implements Serializable {
+
+    @JoinColumn(name = "tpp_id_apurado", referencedColumnName = "tpp_id")
+    @ManyToOne
+    private Tipopag tppIdApurado;
+
+    @Size(max = 35)
+    @Column(name = "pag_descricao")
+    private String pagDescricao;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "pag_valor_apurado")
+    private BigDecimal pagValorApurado;
 
     @JoinColumn(name = "pag_id_invest", referencedColumnName = "pag_id")
     @ManyToOne
@@ -250,6 +265,30 @@ public class Pagamento implements Serializable {
 
     public void setPagIdInvest(Pagamento pagIdInvest) {
         this.pagIdInvest = pagIdInvest;
+    }
+
+    public String getPagDescricao() {
+        return pagDescricao;
+    }
+
+    public void setPagDescricao(String pagDescricao) {
+        this.pagDescricao = pagDescricao;
+    }
+
+    public BigDecimal getPagValorApurado() {
+        return pagValorApurado;
+    }
+
+    public void setPagValorApurado(BigDecimal pagValorApurado) {
+        this.pagValorApurado = pagValorApurado;
+    }
+
+    public Tipopag getTppIdApurado() {
+        return tppIdApurado;
+    }
+
+    public void setTppIdApurado(Tipopag tppIdApurado) {
+        this.tppIdApurado = tppIdApurado;
     }
     
 }

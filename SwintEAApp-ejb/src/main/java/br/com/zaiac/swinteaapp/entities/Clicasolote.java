@@ -29,7 +29,8 @@ import javax.xml.bind.annotation.XmlTransient;
 @NamedQueries
 ({
     @NamedQuery(name = "Clicasolote.findAll", query = "SELECT c FROM Clicasolote c"),
-    @NamedQuery(name = "Clicasolote.findLoteAberto", query = "SELECT c FROM Clicasolote c WHERE c.cliId = :cliId AND c.a01Id = :a01Id AND c.a03Concluido = 'false'")
+    @NamedQuery(name = "Clicasolote.findLoteAberto", query = "SELECT c FROM Clicasolote c WHERE c.cliId = :cliId AND c.a01Id = :a01Id AND c.a03Concluido = 'false' ORDER BY c.a03Dt DESC"),
+    @NamedQuery(name = "Clicasolote.findByA03Id", query = "SELECT c FROM Clicasolote c WHERE c.a03Id = :a03Id")
 })
 public class Clicasolote implements Serializable {
 

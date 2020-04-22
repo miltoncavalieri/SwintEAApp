@@ -1,5 +1,6 @@
 package br.com.zaiac.swinteaapp;
 
+import br.com.zaiac.swinteaapp.REST.Retina;
 import br.com.zaiac.swinteaapp.entities.Agente;
 import br.com.zaiac.swinteaapp.entities.Analise;
 import br.com.zaiac.swinteaapp.entities.CepLocalidade;
@@ -17,15 +18,23 @@ import br.com.zaiac.swinteaapp.entities.Clientecobranca;
 import br.com.zaiac.swinteaapp.entities.Comissao;
 import br.com.zaiac.swinteaapp.entities.Locrecup;
 import br.com.zaiac.swinteaapp.entities.Locrecuploc;
+import br.com.zaiac.swinteaapp.entities.Motivopadrao;
 import br.com.zaiac.swinteaapp.entities.Pagamento;
 import br.com.zaiac.swinteaapp.entities.Pedbus;
+import br.com.zaiac.swinteaapp.entities.Pedbusfase;
 import br.com.zaiac.swinteaapp.entities.Pedbusrel;
 import br.com.zaiac.swinteaapp.entities.Recebimento;
+import br.com.zaiac.swinteaapp.entities.Rvintegra;
+import br.com.zaiac.swinteaapp.entities.Submotivopadrao;
 import br.com.zaiac.swinteaapp.entities.Tipopag;
 import br.com.zaiac.swinteaapp.entities.Usuario;
+import br.com.zaiac.swinteaapp.entities.Websrvjson;
+import br.com.zaiac.swinteaapp.entities.Websrvlogin;
 import br.com.zaiac.swinteaapp.facade.AgenteFacade;
 import br.com.zaiac.swinteaapp.facade.AgentesitFacade;
+import br.com.zaiac.swinteaapp.facade.AmbienteFacade;
 import br.com.zaiac.swinteaapp.facade.AnaliseFacade;
+import br.com.zaiac.swinteaapp.facade.AnalisesitFacade;
 import br.com.zaiac.swinteaapp.facade.CepLocalidadeFacade;
 import br.com.zaiac.swinteaapp.facade.CheckpointFacade;
 import br.com.zaiac.swinteaapp.facade.CkpleituraFacade;
@@ -54,10 +63,20 @@ import br.com.zaiac.swinteaapp.facade.VwPedbusPagoRecebidoFacade;
 import br.com.zaiac.swinteaapp.facade.ClicasofaseFacade;
 import br.com.zaiac.swinteaapp.facade.ClicasovalidacaoFacade;
 import br.com.zaiac.swinteaapp.facade.ClicasovalidacaoanexoFacade;
+import br.com.zaiac.swinteaapp.facade.DbparamFacade;
+import br.com.zaiac.swinteaapp.facade.MotivopadraoFacade;
+import br.com.zaiac.swinteaapp.facade.MotpadraotipoFacade;
+import br.com.zaiac.swinteaapp.facade.RvintegraFacade;
+import br.com.zaiac.swinteaapp.facade.SubmotivopadraoFacade;
 import br.com.zaiac.swinteaapp.facade.VwClicasoAnteriorFaturarFacade;
+import br.com.zaiac.swinteaapp.facade.VwClicasoCancelarSolicitacaoLightFacade;
 import br.com.zaiac.swinteaapp.facade.VwClicasoFaturarConcluido;
 import br.com.zaiac.swinteaapp.facade.VwClicasoFaturarConcluidoFacade;
+import br.com.zaiac.swinteaapp.facade.WebsrvfornecFacade;
+import br.com.zaiac.swinteaapp.facade.WebsrvjsonFacade;
+import br.com.zaiac.swinteaapp.facade.WebsrvloginFacade;
 import br.com.zaiac.swinteaapp.views.VwClicasoAnteriorFaturar;
+import br.com.zaiac.swinteaapp.views.VwClicasoCancelarSolicitacaoLight;
 import br.com.zaiac.swinteaapp.views.VwPagrecInvestigado;
 import br.com.zaiac.swinteaapp.views.VwPedbusPagoRecebido;
 
@@ -66,6 +85,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -93,6 +113,11 @@ import javax.sql.DataSource;
 //import javax.transaction.NotSupportedException;
 //import javax.transaction.RollbackException;
 //import javax.transaction.SystemException;
+//import javax.transaction.HeuristicMixedException;
+//import javax.transaction.HeuristicRollbackException;
+//import javax.transaction.NotSupportedException;
+//import javax.transaction.RollbackException;
+//import javax.transaction.SystemException;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -101,11 +126,15 @@ import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import org.apache.http.client.methods.HttpDelete;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 @Stateless
 
 @TransactionManagement(CONTAINER)
-
 public class EJBOperacao implements EJBOperacaoRemote {
     private static final Logger logger = Logger.getLogger(EJBOperacao.class.getName());
     
@@ -1575,6 +1604,259 @@ Operação: INSERT
         
         
     }
+    
+    @Override
+    public void encerrarPedidoDeBusca (Long pPbuId, Integer mopId, Integer smpId, Short fasId, Integer usuId, String observacao) throws Exception {
+//        CheckpointFacade checkpointJpa  = new CheckpointFacade();
+        
+        CheckpointFacade checkpointJpa = new CheckpointFacade();
+        MotivopadraoFacade motivopadraoJpa = new MotivopadraoFacade();
+        SubmotivopadraoFacade submotivopadraoJpa = new SubmotivopadraoFacade();
+        PedbusFacade pedbusJpa = new PedbusFacade();
+        CkptipoFacade ckptipoJpa = new CkptipoFacade();
+        AnaliseFacade analiseJpa = new AnaliseFacade();
+        PedbusfaseFacade pedbusfaseJpa = new PedbusfaseFacade();
+        AnalisesitFacade analisesitJpa = new AnalisesitFacade();
+        WebsrvloginFacade websrvloginJpa = new WebsrvloginFacade();
+        WebsrvjsonFacade websrvjsonJpa = new WebsrvjsonFacade();    
+        AmbienteFacade ambienteJpa = new AmbienteFacade();
+        WebsrvfornecFacade websrvfornecJpa = new WebsrvfornecFacade();  
+        MotpadraotipoFacade motpadraotipoJpa = new MotpadraotipoFacade();
+        UsuarioFacade usuarioJpa = new UsuarioFacade();
+        RvintegraFacade rvintegraJpa = new RvintegraFacade();
+        DbparamFacade dbparamJpa = new DbparamFacade();
+        
+
+        motivopadraoJpa.setEm(em);
+        submotivopadraoJpa.setEm(em);
+        pedbusJpa.setEm(em);
+        ckptipoJpa.setEm(em);
+        analiseJpa.setEm(em);
+        pedbusfaseJpa.setEm(em);
+        analisesitJpa.setEm(em);
+        websrvloginJpa.setEm(em);
+        websrvjsonJpa.setEm(em);
+        ambienteJpa.setEm(em);
+        websrvfornecJpa.setEm(em);
+        motpadraotipoJpa.setEm(em);
+        checkpointJpa.setEm(em);
+        usuarioJpa.setEm(em);
+        dbparamJpa.setEm(em);
+        
+        String strJsonObject;
+        String strTipoJson;
+        
+        JSONObject jsonObject;
+        String token;
+        HttpDelete delete;
+        
+        JSONParser jsonParser = new JSONParser();
+        JSONArray jsonArray;
+
+        DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");  
+        
+        Analise analise;
+        Pedbus pedbus;
+        Motivopadrao motivopadrao;
+        Submotivopadrao submotivopadrao;
+        Checkpoint checkpoint = new Checkpoint();
+        Usuario usuario;
+        
+        Long error;
+        
+        try {
+            analise = analiseJpa.findByPbuId(pPbuId);
+            
+            if (analise.getAnaAtivo() == (short)0) {
+                 throw new Exception("Registro ja esta ENCERRADO por outro usuário");
+            }
+            
+            motivopadrao = motivopadraoJpa.findByMopId(mopId);
+            submotivopadrao = submotivopadraoJpa.findBySmpId(smpId);
+            usuario = usuarioJpa.findByUsuId(usuId);
+            
+            try {
+                pedbus = pedbusJpa.findByPbuId(pPbuId);
+            } catch (NoResultException e) {
+                pedbus = null;
+            }
+            
+            checkpoint.setPbuId(analise);
+            checkpoint.setPckDt(new Date(System.currentTimeMillis()));
+            checkpoint.setCktId(ckptipoJpa.findByCktId((short) 13));
+            checkpoint.setUsuIdCkp(usuario);
+            checkpoint.setPckRelatorio((short)0);
+            checkpoint.setPckAtivo((short)1);
+            checkpoint.setSmpId(submotivopadrao);
+            checkpoint.setMopId(motivopadrao);
+            if (pedbus == null) {
+                checkpoint.setEuiId(analise.getEuiId());
+            } else {
+                checkpoint.setEuiId(pedbus.getEuiId());
+            }
+            checkpoint.setFasId(pedbusfaseJpa.findByFasId(fasId));
+            checkpointJpa.create(checkpoint);
+
+            analise.setAnaAtivo((short)(0));
+            analiseJpa.edit(analise);
+            
+            if (analise.getA04IdCaso() != null) {
+                cancelarCaso(analise);
+            }
+            
+            try {
+                if (websrvfornecJpa.activeService("RETINA")) {
+                    Rvintegra rvintegra = new Rvintegra();
+                    rvintegra.setPbuId(analise);                   
+
+                    Websrvlogin websrvlogin = websrvloginJpa.findLogin(ambienteJpa.findByAmbId(dbparamJpa.findByParId().getAmbId()), websrvfornecJpa.findByWbfId("RETINA"));
+                    Websrvjson websrvjsonToken = websrvjsonJpa.findService(ambienteJpa.findByAmbId(dbparamJpa.findByParId().getAmbId()), websrvfornecJpa.findByWbfId("RETINA"), "api-token-auth");
+                    Websrvjson websrvjsonSinister = websrvjsonJpa.findService(ambienteJpa.findByAmbId(dbparamJpa.findByParId().getAmbId()), websrvfornecJpa.findByWbfId("RETINA"), "sinister");
+
+                    strJsonObject = Retina.recoveredRetina(websrvlogin, websrvjsonToken, websrvjsonSinister, analise);
+                    strTipoJson = Retina.checkTipoDado(strJsonObject);
+
+                    if (strTipoJson.equals("JSONArray")) {
+                        jsonArray = (JSONArray) jsonParser.parse(strJsonObject);    
+                        for (int i = 0; i < jsonArray.size(); i++) {
+                            JSONObject explrObject =  (JSONObject) jsonArray.get(i);
+                            logger.log(Level.SEVERE, (String) explrObject.get("reason"));
+                        }
+                        logger.log(Level.SEVERE, "Erro na integracao com o Retina PB: {0}", analise.getPbuId());
+                    } else {
+                        try {
+                            jsonObject = (JSONObject) jsonParser.parse(strJsonObject);
+                            error = (Long) jsonObject.get("error");
+                            rvintegra.setRviDtIntegracao(analise.getAnaDt());
+                        } catch (ParseException e) {                        
+                            logger.log(Level.SEVERE, "Erro na integracao com o Retina PB: {0}", analise.getPbuId());
+                        }
+                    }
+                    rvintegraJpa.create(rvintegra);
+                }
+            } catch (ParseException e1) {
+                throw new Exception("Erro na carga do Json RETINA");
+            } catch (NoResultException e1) {
+                throw new Exception("Não encontrado informações de configuracao WEB do RETINA");
+            }
+        } catch (NoResultException e) {
+            throw new Exception ("Analise/Motivo/Submotivo/Usuario ou  não encontrada");
+        }
+    }
+    
+    
+    
+    
+    
+    private void cancelarCaso(Analise analise) throws Exception {
+        ClicasoFacade clicasoJpa = new ClicasoFacade();
+        ClicasofaseFacade clicasofaseJpa = new ClicasofaseFacade();
+        ClicasocheckpointFacade  clicasocheckpointJpa = new ClicasocheckpointFacade();
+        ClicasoloteFacade clicasoloteJpa = new ClicasoloteFacade();
+        ClicasotipoloteFacade clicasotipoloteJpa = new ClicasotipoloteFacade();        
+        VwClicasoCancelarSolicitacaoLightFacade vwClicasoCancelarSolicitacaoLightJpa = new VwClicasoCancelarSolicitacaoLightFacade();
+        ClienteFacade clienteJpa = new ClienteFacade();
+        
+        
+        vwClicasoCancelarSolicitacaoLightJpa.setEm(em);
+        clicasoJpa.setEm(em);
+        clicasotipoloteJpa.setEm(em);
+        clicasofaseJpa.setEm(em);
+        clicasocheckpointJpa.setEm(em);
+        clicasoloteJpa.setEm(em);
+        clicasotipoloteJpa.setEm(em);
+        clienteJpa.setEm(em);
+        
+        
+        VwClicasoCancelarSolicitacaoLight vwClicasoCancelarSolicitacaoLight;
+        
+        Clicaso clicaso;
+        
+        Clicasocheckpoint clicasocheckpoint;
+        ClicasocheckpointPK clicasocheckpointPK;
+        Clicasolote clicasolote;
+        
+        try {
+
+            vwClicasoCancelarSolicitacaoLight = vwClicasoCancelarSolicitacaoLightJpa.findByPbuId(analise.getPbuId());            
+            
+            if (vwClicasoCancelarSolicitacaoLight.getA04IdCasoCancelar() == null) {                
+                try {
+                    clicasolote = clicasoloteJpa.findLoteAberto(analise.getCliId(), clicasotipoloteJpa.findByA01Id((short)3));
+                } catch (NoResultException e) {
+                    clicasolote = new Clicasolote();
+                    clicasolote.setA01Id(clicasotipoloteJpa.findByA01Id((short)3));
+                    clicasolote.setA03Concluido("false");
+                    clicasolote.setA03Dt(new Date(System.currentTimeMillis()));
+                    clicasolote.setCliId(clienteJpa.findByCliId(vwClicasoCancelarSolicitacaoLight.getCliId()));
+                    clicasoloteJpa.create(clicasolote);
+                }
+                clicaso = new Clicaso();
+                clicaso.setA03Id(clicasolote);
+                clicaso.setA04IdCasoCliente(vwClicasoCancelarSolicitacaoLight.getA04IdCasoClienteCriar());
+                clicasoJpa.create(clicaso);
+
+                clicasocheckpoint = new Clicasocheckpoint();
+                clicasocheckpointPK = new ClicasocheckpointPK();
+
+                clicasocheckpointPK.setA04IdCaso(clicaso.getA04IdCaso());
+                clicasocheckpointPK.setA05Seq(clicasocheckpointJpa.findMaxA05Seq(clicaso.getA04IdCaso()));
+                clicasocheckpoint.setClicasocheckpointPK(clicasocheckpointPK);
+                clicasocheckpoint.setA05Dt(new Date(System.currentTimeMillis()));                
+                
+                clicasocheckpoint.setClicasofase(clicasofaseJpa.findByA01IdA02Id(clicasolote.getA01Id().getA01Id(), (short)(1)));                
+                
+                clicasocheckpoint.setClicaso(clicaso);
+                clicasocheckpointJpa.create(clicasocheckpoint);
+            } else {
+                clicasolote = clicasoloteJpa.findLoteAberto(analise.getCliId(), clicasotipoloteJpa.findByA01Id(vwClicasoCancelarSolicitacaoLight.getA01IdCancelar()));
+                clicaso = clicasoJpa.findByA04IdCaso(vwClicasoCancelarSolicitacaoLight.getA04IdCasoCancelar().longValue());
+            }
+                
+            /*
+            Criar Registro de Aprovacao
+            */
+
+            clicasocheckpoint = new Clicasocheckpoint();
+            clicasocheckpointPK = new ClicasocheckpointPK();
+
+            clicasocheckpointPK.setA04IdCaso(clicaso.getA04IdCaso());
+            clicasocheckpointPK.setA05Seq(clicasocheckpointJpa.findMaxA05Seq(clicaso.getA04IdCaso()));
+            clicasocheckpoint.setClicasocheckpointPK(clicasocheckpointPK);
+            clicasocheckpoint.setA05Dt(new Date(System.currentTimeMillis()));
+            clicasocheckpoint.setClicasofase(clicasofaseJpa.findByA01IdA02Id(clicasolote.getA01Id().getA01Id(), (short)(2)));
+            clicasocheckpoint.setClicaso(clicaso);
+            clicasocheckpointJpa.create(clicasocheckpoint);
+
+            /*
+            Criar registro de Enviar
+            */
+
+            clicasocheckpoint = new Clicasocheckpoint();
+            clicasocheckpointPK = new ClicasocheckpointPK();
+
+            clicasocheckpointPK.setA04IdCaso(clicaso.getA04IdCaso());
+            clicasocheckpointPK.setA05Seq(clicasocheckpointJpa.findMaxA05Seq(clicaso.getA04IdCaso()));
+            clicasocheckpoint.setClicasocheckpointPK(clicasocheckpointPK);
+            clicasocheckpoint.setA05Dt(new Date(System.currentTimeMillis()));
+            clicasocheckpoint.setClicasofase(clicasofaseJpa.findByA01IdA02Id(clicasolote.getA01Id().getA01Id(), (short)(3)));
+            clicasocheckpoint.setClicaso(clicaso);
+            clicasocheckpointJpa.create(clicasocheckpoint);
+
+            clicaso.setA05SeqUltimoStatus(clicasocheckpoint.getClicasocheckpointPK().getA05Seq());
+            clicasoJpa.edit(clicaso);
+
+            clicasolote = clicasoloteJpa.findByA03Id(clicaso.getA03Id().getA03Id());
+
+            if (clicasolote.getA03Concluido().equals("false")) {
+                clicasoloteJpa.updateA03ConcluidoByLotes(clicaso.getA03Id().getA03Id());
+            }
+        } catch (NoResultException e) {
+            throw new Exception("Caso não encontrado");
+        }
+    }
+    
+    
     
     
     

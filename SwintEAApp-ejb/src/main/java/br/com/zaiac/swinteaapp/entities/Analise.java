@@ -35,6 +35,9 @@ import javax.xml.bind.annotation.XmlTransient;
 })
 public class Analise implements Serializable {
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "pbuId")
+    private List<Rvintegra> rvintegraList;
+
     @JoinColumn(name = "a04_id_caso", referencedColumnName = "a04_id_caso")
     @ManyToOne
     private Clicaso a04IdCaso;
@@ -556,6 +559,15 @@ public class Analise implements Serializable {
 
     public void setA04IdCaso(Clicaso a04IdCaso) {
         this.a04IdCaso = a04IdCaso;
+    }
+
+    @XmlTransient
+    public List<Rvintegra> getRvintegraList() {
+        return rvintegraList;
+    }
+
+    public void setRvintegraList(List<Rvintegra> rvintegraList) {
+        this.rvintegraList = rvintegraList;
     }
     
 }

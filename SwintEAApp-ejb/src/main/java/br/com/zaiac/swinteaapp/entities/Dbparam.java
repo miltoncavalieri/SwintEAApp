@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.zaiac.swinteaapp.entities;
 
 import java.io.Serializable;
@@ -17,15 +12,13 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
-/**
- *
- * @author root
- */
 @Entity
 @Table(name = "dbparam")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Dbparam.findAll", query = "SELECT d FROM Dbparam d")})
+    @NamedQuery(name = "Dbparam.findAll", query = "SELECT d FROM Dbparam d"),
+    @NamedQuery(name = "Dbparam.findByParId", query = "SELECT d FROM Dbparam d WHERE d.parId = 1")
+})
 public class Dbparam implements Serializable {
 
     private static final long serialVersionUID = 1L;

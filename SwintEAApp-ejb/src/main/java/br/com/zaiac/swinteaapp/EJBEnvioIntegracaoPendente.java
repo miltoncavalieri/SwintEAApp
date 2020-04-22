@@ -5,17 +5,22 @@ import br.com.zaiac.swinteaapp.entities.Clicaso;
 import br.com.zaiac.swinteaapp.entities.Clicasocheckpoint;
 import br.com.zaiac.swinteaapp.entities.ClicasocheckpointPK;
 import br.com.zaiac.swinteaapp.entities.Clicasofase;
+import br.com.zaiac.swinteaapp.entities.Clicasolote;
 import br.com.zaiac.swinteaapp.facade.AnaliseFacade;
 //import br.com.zaiac.swinteaapp.facade.AnalisedocFacade;
 import br.com.zaiac.swinteaapp.facade.ClicasoFacade;
 import br.com.zaiac.swinteaapp.facade.ClicasocheckpointFacade;
 import br.com.zaiac.swinteaapp.facade.ClicasofaseFacade;
 import br.com.zaiac.swinteaapp.facade.ClicasoloteFacade;
+import br.com.zaiac.swinteaapp.facade.ClicasotipoloteFacade;
+import br.com.zaiac.swinteaapp.facade.ClienteFacade;
+import br.com.zaiac.swinteaapp.facade.VwClicasoCancelarEnviarLightFacade;
 //import br.com.zaiac.swinteaapp.facade.DbparamFacade;
 //import br.com.zaiac.swinteaapp.facade.PedbusFacade;
 //import br.com.zaiac.swinteaapp.facade.PedbusitFacade;
 //import br.com.zaiac.swinteaapp.facade.SysparamFacade;
 import br.com.zaiac.swinteaapp.facade.VwClicasoPendenvioFacade;
+import br.com.zaiac.swinteaapp.views.VwClicasoCancelarEnviarLight;
 //import br.com.zaiac.swinteaapp.facade.VwPbemailtoccFacade;
 //import br.com.zaiac.swinteaapp.facade.VwPedbusEnvioFacade;
 import br.com.zaiac.swinteaapp.views.VwClicasoPendenvio;
@@ -64,10 +69,16 @@ public class EJBEnvioIntegracaoPendente {
     private final ClicasocheckpointFacade clicasocheckpointJpa = new ClicasocheckpointFacade();
     private final ClicasoloteFacade clicasoloteJpa = new ClicasoloteFacade();
     private final ClicasofaseFacade clicasofaseJpa = new ClicasofaseFacade();
+    private final ClicasotipoloteFacade clicasotipoloteJpa = new ClicasotipoloteFacade();
+    private final ClienteFacade clienteJpa = new ClienteFacade();
+    
+//    private final ClicasoloteFacade clicasoloteJpa = new ClicasoloteFacade();
+    private final VwClicasoCancelarEnviarLightFacade vwClicasoCancelarEnviarLightJpa = new VwClicasoCancelarEnviarLightFacade();
     
 
 //    @Schedule(dayOfWeek = "*", hour = "22", minute = "00", year="*", persistent = false)
-    @Schedule(dayOfWeek = "*", hour = "*", minute = "*/20", year="*", persistent = false)        
+    @Schedule(dayOfWeek = "*", hour = "*", minute = "*/30", year="*", persistent = false)        
+//    @Schedule(dayOfWeek = "*", hour = "*", minute = "*/5", year="*", persistent = false)        
     public void envioIntegracaoPendente()    {
         List<VwClicasoPendenvio> vwClicasoPendenvios;
         
@@ -86,14 +97,34 @@ public class EJBEnvioIntegracaoPendente {
         clicasoloteJpa.setEm(em);
         clicasofaseJpa.setEm(em);
         vwClicasoPendenvioJpa.setEm(em);
+        vwClicasoCancelarEnviarLightJpa.setEm(em);
+        clienteJpa.setEm(em);
+        clicasotipoloteJpa.setEm(em);
 
         vwClicasoPendenvios = vwClicasoPendenvioJpa.findAll();
         Analise analise;
 
         Clicaso clicaso;
+        Clicasolote clicasolote;
         Clicasocheckpoint clicasocheckpoint;
         Clicasofase clicasofase;
         ClicasocheckpointPK clicasocheckpointPK;
+        
+
+/* 
+   +----------------------------------------------------------------------------------------------+
+   |                                                                                              |
+   |                                                                                              | 
+   |                                                                                              |
+   |                   Casos de Integracao de Recuperacoes e Investigacoes                        |
+   |                                                                                              | 
+   |                                                                                              |                 
+   |                                                                                              |
+   +----------------------------------------------------------------------------------------------+             
+*/                
+
+
+        
         
 
         for (VwClicasoPendenvio vw :  vwClicasoPendenvios) {
@@ -129,6 +160,8 @@ public class EJBEnvioIntegracaoPendente {
                     clicasocheckpoint.setClicasofase(clicasofase);
                     clicasocheckpoint.setA05Dt(new Date(System.currentTimeMillis()));
                     clicasocheckpointJpa.create(clicasocheckpoint);
+                    
+                    
                     clicaso.setA05SeqUltimoStatus(clicasocheckpoint.getClicasocheckpointPK().getA05Seq());
                     clicasoJpa.edit(clicaso);
                     tx.commit();
@@ -170,6 +203,82 @@ public class EJBEnvioIntegracaoPendente {
                 logger.log(Level.SEVERE, "Problema com o Analise/Caso {1}/{2}", new Object[]{String.valueOf(vw.getPbuId()), String.valueOf(vw.getA04IdCaso())});
             }
         }
+        
+        
+/* 
+   +----------------------------------------------------------------------------------------------+
+   |                                                                                              |
+   |                                                                                              | 
+   |                                                                                              |
+   |                   Casos de Integracao de Recuperacoes e Investigacoes                        |
+   |                                                                                              | 
+   |                                                                                              |                 
+   |                                                                                              |
+   +----------------------------------------------------------------------------------------------+             
+*/                
+        List<VwClicasoCancelarEnviarLight> vwClicasoCancelarEnviarLights;
+        vwClicasoCancelarEnviarLights = vwClicasoCancelarEnviarLightJpa.findAll();
+        
+        for (VwClicasoCancelarEnviarLight casos : vwClicasoCancelarEnviarLights) {
+
+/* +----------------------------------------------------------------------------------------------+
+   |                                                                                              |
+   |                                                                                              | 
+   |                                                                                              |
+   |                   Colocar aqui o codigo de integracao com o Localiza                         |
+   |                                                                                              | 
+   |                                                                                              |                 
+   |                                                                                              |
+   +----------------------------------------------------------------------------------------------+             
+*/                
+            try {
+            
+                tx.begin();
+                clicasolote = clicasoloteJpa.findLoteAberto(clienteJpa.findByCliId(casos.getCliId()), clicasotipoloteJpa.findByA01Id(casos.getA01Id()));
+                clicaso = clicasoJpa.findByA04IdCaso(casos.getA04IdCasoCancelar().longValue());
+
+                clicasocheckpoint = new Clicasocheckpoint();
+                clicasocheckpointPK = new ClicasocheckpointPK();
+
+                clicasocheckpointPK.setA04IdCaso(clicaso.getA04IdCaso());
+                clicasocheckpointPK.setA05Seq(clicasocheckpointJpa.findMaxA05Seq(clicaso.getA04IdCaso()));
+                clicasocheckpoint.setClicasocheckpointPK(clicasocheckpointPK);
+                clicasocheckpoint.setA05Dt(new Date(System.currentTimeMillis()));                
+
+                clicasocheckpoint.setClicasofase(clicasofaseJpa.findByA01IdA02Id(clicasolote.getA01Id().getA01Id(), (short)(4)));                
+
+                clicasocheckpoint.setClicaso(clicaso);
+                clicasocheckpointJpa.create(clicasocheckpoint);
+                
+                clicaso.setA05SeqUltimoStatus(clicasocheckpoint.getClicasocheckpointPK().getA05Seq());
+                clicasoJpa.edit(clicaso);
+                
+                
+                
+                tx.commit();
+            } catch (Exception e) {
+                if (
+                    (e instanceof RollbackException) ||     
+                    (e instanceof HeuristicMixedException) ||     
+                    (e instanceof HeuristicRollbackException)
+                    ) {  
+                    logger.log(Level.WARNING, "Problema com o Caso/Caso Cliente {1}/{2}", new Object[]{casos.getA04IdCasoCancelar().toString(),casos.getA04IdCasoClienteCancelar().toString()});
+                } else {
+                    try {
+                        tx.rollback();
+                        logger.log(Level.WARNING, "Problema com o Caso/Caso Cliente {1}/{2}", new Object[]{casos.getA04IdCasoCancelar().toString(),casos.getA04IdCasoClienteCancelar().toString()});
+                    } catch (IllegalStateException | SecurityException | SystemException e1) {
+                        logger.log(Level.WARNING, "Problema com o Caso/Caso Cliente {1}/{2}", new Object[]{casos.getA04IdCasoCancelar().toString(),casos.getA04IdCasoClienteCancelar().toString()});
+                    }
+                }            
+            }
+            
+        }
+
+
+
+
+
         isRunningEnvioPendente = false;        
     }
     

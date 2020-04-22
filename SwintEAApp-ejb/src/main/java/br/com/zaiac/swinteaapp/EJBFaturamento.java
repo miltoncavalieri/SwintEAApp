@@ -31,7 +31,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 
 @Stateless
-
 @TransactionManagement(CONTAINER)
 public class EJBFaturamento implements EJBFaturamentoRemote {
     private static final Logger logger = Logger.getLogger(EJBFaturamento.class.getName());

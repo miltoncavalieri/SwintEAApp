@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.zaiac.swinteaapp.entities;
 
 import java.io.Serializable;
@@ -25,15 +20,13 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-/**
- *
- * @author root
- */
 @Entity
 @Table(name = "motivopadrao")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Motivopadrao.findAll", query = "SELECT m FROM Motivopadrao m")})
+    @NamedQuery(name = "Motivopadrao.findAll", query = "SELECT m FROM Motivopadrao m"),
+    @NamedQuery(name = "Motivopadrao.findByMopId", query = "SELECT m FROM Motivopadrao m WHERE m.mopId = :mopId")
+})
 public class Motivopadrao implements Serializable {
 
     @OneToMany(mappedBy = "mopId")
